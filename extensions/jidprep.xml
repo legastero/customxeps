@@ -129,14 +129,6 @@
     </xs:documentation>
   </xs:annotation>
 
-  <xs:element name='query'>
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element ref='jid' minOccurs='1' />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
   <xs:element name='jid'>
     <xs:complexType>
       <xs:simpleContent />
