@@ -39,7 +39,7 @@
   <p>In some environments (in particular, browser based environments), a client does not have access to the various Unicode and internationalization libraries necessary to properly prep and normalize a JID. For those situations, this protocol defines a way for a client to ask a server to normalize a JID on its behalf.</p>
 </section1>
 <section1 topic='Discovering support' anchor='disco'>
-  <p>If a server supports JID prep queries, it MUST specify the 'urn:xmpp:jidprep:0' feature in its service discovery information features as specified in &xep0030; and the Entity Capabilities profile specified in &xep0115;.</p>
+  <p>If a server supports JID prep queries, it MUST specify the 'urn:xmpp:jidprep:tmp' feature in its service discovery information features as specified in &xep0030; and the Entity Capabilities profile specified in &xep0115;.</p>
   <example caption='Client checks for support by the server'><![CDATA[
 <iq type='get'
     from='juliet@capulet.lit/balcony'
@@ -53,31 +53,39 @@
     id='info1'>
   <query xmlns='http://jabber.org/protocol/disco#info'>
 ...
-    <feature var='urn:xmpp:jidprep:0'/>
+    <feature var='urn:xmpp:jidprep:tmp'/>
 ...
   </query>
 </iq>]]></example>
 </section1>
 <section1 topic='Use Cases' anchor='usecases'>
-  <p>In order to request prepping for a JID, the client sends an &IQ; stanza of type "get" to the server, containing a &QUERY; element qualified by the 'urn:xmpp:jidprep:0' namespace, which MUST contain a &lt;jid/&gt; element whose XML character data is the JID in question:</p>
+  <p>In order to request prepping for a JID, the client sends an &IQ; stanza of type "get" to the server, containing a &lt;jid/&gt; element qualified by the 'urn:xmpp:jidprep:tmp' namespace and whose XML character data is the JID in question:</p>
   <example caption='Client requests the server to prep and normalize a JID'><![CDATA[
 <iq type="get"
     to="capulet.lit"
     id="prep1">
-  <query xmlns="urn:xmpp:jidprep:0">
-    <jid>ROMeo@montague.lit/orchard</jid>
-  </query>
+  <jid xmlns="urn:xmpp:jidprep:tmp">ROMeo@montague.lit/orchard</jid>
 </iq>
 ]]></example>
-  <p>The server MUST return either an IQ-result or an IQ-error. When returning an IQ-result, the server sends an &IQ; staza of type='result' containing a &QUERY; element, which MUST contain a &lt;jid/&gt; element whose XML character data is the prepped and normalized version of the requested JID:</p>
+  <p>The server MUST return either an IQ-result or an IQ-error. When returning an IQ-result, the server sends an &IQ; staza of type='result' containing a &lt;jid/&gt; element qualifed by the 'urn:xmpp:jidprep:tmp' namespace and whose XML character data MUST be the prepped and normalized version of the requested JID:</p>
   <example caption='Server responds with the prepped JID'><![CDATA[
 <iq type="result"
     to="juliet@capulet.lit/balcony"
     from="capulet.lit"
     id="prep1">
-  <query xmlns="urn:xmpp:jidprep:0">
-    <jid>romeo@montague.lit/orchard</jid>
-  </query>
+  <jid xmlns="urn:xmpp:jidprep:tmp">romeo@montague.lit/orchard</jid>
+</iq>
+]]></example>
+  <p>If an IQ-error is returned, then it SHOULD specify an error condition of &lt;jid-malformed/&gt; if the given JID could not be processed to a normalized form:</p>
+  <example caption='Server responds with an error for an invalid JID'><![CDATA[
+<iq type="error"
+    to="juliet@capulet.lit/balcony"
+    from="capulet.lit"
+    id="prep1">
+  <jid xmlns="urn:xmpp:jidprep:tmp">romeo@@montague.lit/orchard</jid>
+  <error type="modify">
+    <jid-malformed xmlns="urn:ietf:params:xml:ns:xmpp-stanzas" />
+  </error>
 </iq>
 ]]></example>
 </section1>
@@ -94,9 +102,9 @@
 </section1>
 <section1 topic='XMPP Registrar Considerations' anchor='registrar'>
   <section2 topic='Protocol Namespaces' anchor='ns'>
-    <p>The &REGISTRAR; includes 'urn:xmpp:jidprep:0' in its registry of protocol namespaces (see &NAMESPACES;).</p>
+    <p>The &REGISTRAR; includes 'urn:xmpp:jidprep:tmp' in its registry of protocol namespaces (see &NAMESPACES;).</p>
     <ul>
-      <li>urn:xmpp:jidprep:0</li>
+      <li>urn:xmpp:jidprep:tmp</li>
     </ul>
   </section2>
   <section2 topic='Protocol Versioning' anchor='registrar-versioning'>
@@ -110,8 +118,8 @@
 
 <xs:schema
     xmlns:xs='http://www.w3.org/2001/XMLSchema'
-    targetNamespace='urn:xmpp:jidprep:0'
-    xmlns='urn:xmpp:jidprep:0'
+    targetNamespace='urn:xmpp:jidprep:tmp'
+    xmlns='urn:xmpp:jidprep:tmp'
     elementFormDefault='qualified'>
 
   <xs:annotation>
