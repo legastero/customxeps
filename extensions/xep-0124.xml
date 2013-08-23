@@ -1,0 +1,1157 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE xep SYSTEM 'xep.dtd' [
+  <!ENTITY % ents SYSTEM 'xep.ent'>
+%ents;
+]>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+  <header>
+    <title>Bidirectional-streams Over Synchronous HTTP (BOSH)</title>
+    <abstract>This specification defines a transport protocol that emulates the semantics of a long-lived, bidirectional TCP connection between two entities (such as a client and a server) by efficiently using multiple synchronous HTTP request/response pairs without requiring the use of frequent polling or chunked responses.</abstract>
+    &LEGALNOTICE;
+    <number>0124</number>
+    <status>Draft</status>
+    <type>Standards Track</type>
+    <jig>Standards</jig>
+    <dependencies>
+      <spec>RFC 1945</spec>
+      <spec>RFC 2616</spec>
+      <spec>RFC 3174</spec>
+    </dependencies>
+    <supersedes/>
+    <supersededby/>
+    <shortname>bosh</shortname>
+    <schemaloc>
+      <url>http://www.xmpp.org/schemas/httpbind.xsd</url>
+    </schemaloc>
+    &ianpaterson;
+    &dizzyd;
+    &stpeter;
+    &metajack;
+    <revision>
+      <version>1.10</version>
+      <date>2010-07-02</date>
+      <initials>psa</initials>
+      <remark><p>Further clarified use of 'from' and 'to' attributes; added missing condition values to the schema.</p></remark>
+    </revision>
+    <revision>
+      <version>1.9</version>
+      <date>2009-11-06</date>
+      <initials>psa</initials>
+      <remark><p>Added information for registration of port 5280 with IANA.</p></remark>
+    </revision>
+    <revision>
+      <version>1.8</version>
+      <date>2009-04-30</date>
+      <initials>psa/jm</initials>
+      <remark><p>Removed secure attribute because it did not solve the problem it was intended to solve; added security consideration regarding link between connection manager and application server; changed &quot;stanza&quot; to &quot;payload&quot; for disambiguation with XMPP; clarified design objectives and relationship to similar technologies; corrected several errors in the schema.</p></remark>
+    </revision>
+    <revision>
+      <version>1.7</version>
+      <date>2008-10-29</date>
+      <initials>psa</initials>
+      <remark><p>Moved alternative script syntax to historical specification; added implementation note about HTTP Pipelining; adjusted architectural description.</p></remark>
+    </revision>
+    <revision>
+      <version>1.6</version>
+      <date>2007-02-21</date>
+      <initials>ip</initials>
+      <remark><p>Multiple clarifications and restructuring without changes to protocol itself; changed title to BOSH; added section that fully explains the technique underlying the protocol; separated XMPP-specific features into new XEP-0206; added optional new Script Syntax and session pauses; added Acknowledgements section; added from and ver attributes; added hold attribute to session creation response; clarified polling too-frequently error; recommended that clients use HTTP Pipelining.</p></remark>
+    </revision>
+    <revision>
+      <version>1.5</version>
+      <date>2006-04-28</date>
+      <initials>ip/psa</initials>
+      <remark><p>Added optional Multiple Streams section; added security considerations about encrypted HTTP connections; recommended use of SSL rather than HTTP over TLS; specified that request ID values must not exceed 9007199254740991; corrected datatypes of inactivity, polling, rid, and wait attributes in the schema; added &lt;any/&gt; and &lt;anyAttribute/&gt; elements to schema to optionally support non-XMPP XML elements and attributes; deprecated HTTP error codes in favor of new terminal binding conditions.</p></remark>
+    </revision>
+    <revision>
+      <version>1.4</version>
+      <date>2005-12-14</date>
+      <initials>psa</initials>
+      <remark><p>Modified syntax of route attribute to be proto:host:port rather than XMPP URI/IRI.</p></remark>
+    </revision>
+    <revision>
+      <version>1.3</version>
+      <date>2005-11-02</date>
+      <initials>ip</initials>
+      <remark><p>Corrected stream:features namespace and the Recoverable Binding Conditions section; recommended that connection manager shall return secure attribute to client; recommended end-to-end encryption through proxy connection managers.</p></remark>
+    </revision>
+    <revision>
+      <version>1.2</version>
+      <date>2005-06-16</date>
+      <initials>ip</initials>
+      <remark><p>Specified optional use of route and secure attributes in session request. Minor correction: the stream features element should be included in the response that contains the authid attribute (this is not necessarily the session creation response).</p></remark>
+    </revision>
+    <revision>
+      <version>1.1</version>
+      <date>2005-06-02</date>
+      <initials>ip</initials>
+      <remark><p>Specified optional use of HTTP Accept-Encoding and Content-Encoding headers for compression at HTTP binding level.</p></remark>
+    </revision>
+    <revision>
+      <version>1.0</version>
+      <date>2005-03-03</date>
+      <initials>psa</initials>
+      <remark><p>Per a vote of the Jabber Council, advanced status to Draft.</p></remark>
+    </revision>
+    <revision>
+      <version>0.10</version>
+      <date>2004-11-08</date>
+      <initials>ip</initials>
+      <remark><p>Changed HTTP 401 errors to HTTP 404.</p></remark>
+    </revision>
+    <revision>
+      <version>0.9</version>
+      <date>2004-10-26</date>
+      <initials>ip/psa</initials>
+      <remark><p>Added charset attribute.</p></remark>
+    </revision>
+    <revision>
+      <version>0.8</version>
+      <date>2004-10-26</date>
+      <initials>ip</initials>
+      <remark><p>Specified that wait attribute must be included in the session creation response.</p></remark>
+    </revision>
+    <revision>
+      <version>0.7</version>
+      <date>2004-08-12</date>
+      <initials>psa/ip</initials>
+      <remark><p>Defined appropriate XMPP stanza error conditions.</p></remark>
+    </revision>
+    <revision>
+      <version>0.6</version>
+      <date>2004-07-19</date>
+      <initials>ip</initials>
+      <remark><p>Added xml:lang attribute to the session request; added recoverable binding error conditions.</p></remark>
+    </revision>
+    <revision>
+      <version>0.5</version>
+      <date>2004-05-07</date>
+      <initials>ip/psa</initials>
+      <remark><p>Protocol refactored to enable simultaneous requests (request identifier attribute, wait attribute, hold attribute, requests attribute) and recovery of broken connections; added content attribute; removed all wrapper types except 'terminate'; updated error handling; made key mechanism optional (should use SSL/TLS instead).</p></remark>
+    </revision>
+    <revision>
+      <version>0.4</version>
+      <date>2004-02-23</date>
+      <initials>psa/ip</initials>
+      <remark><p>Fixed typos; removed "resource-constraint" binding error; added HTTP 403 error to table.</p></remark>
+    </revision>
+    <revision>
+      <version>0.3</version>
+      <date>2004-02-19</date>
+      <initials>psa/ip</initials>
+      <remark><p>Added 'authid' attribute to enable communication of XMPP stream ID (used in digest authentication); specified that Content-Types other than "text/xml" are allowed to support older HTTP clients; specified business rule for connection manager queueing of client requests; changed &lt;packet/&gt; to &lt;body/&gt; to support older HTTP clients; changed 'to' attribute on initialization element from MAY to SHOULD; recommended inclusion of unavailable presence in termination element sent from client; described architectural assumptions; specified binding-specific error handling.</p></remark>
+    </revision>
+    <revision>
+      <version>0.2</version>
+      <date>2004-01-13</date>
+      <initials>dss/psa/ip</initials>
+      <remark><p>Added 'to' attribute on the initialization element; specified that 'text/html' is allowable for backwards-compatibility.</p></remark>
+    </revision>
+    <revision>
+      <version>0.1</version>
+      <date>2003-11-06</date>
+      <initials>dss/psa</initials>
+      <remark><p>Initial version.</p></remark>
+    </revision>
+  </header>
+  <section1 topic="Introduction" anchor='intro'>
+    <p>The Transmission Control Protocol (TCP; &rfc0793;) is often used to establish a stream-oriented connection between two entities. Such connections can often be long-lived to enable an interactive "session" between the entities. However, sometimes the nature of the device or network can prevent an application from maintaining a long-lived TCP connection to a server or peer. In this case, it is desirable to use an alternative connection method that emulates the behavior of a long-lived TCP connection using a sequenced series of requests and responses that are exchanged over short-lived connections. The appropriate request-response semantics are widely available via the Hypertext Transfer Protocol (HTTP) as specified in &rfc1945; and &rfc2616;.</p>
+    <p>BOSH, the technology defined in this specification, essentially provides a "drop-in" alternative to a long-lived, bidirectional TCP connection. It is a mature, full-featured technology that has been widely implemented and deployed since 2004. To our knowledge it was the first of many similar technologies, which now include the Comet methodology formalized in the &bayeux; as well as &websocket; and &rhttp;.</p>
+    <p>BOSH is designed to transport any data efficiently and with minimal latency in both directions. For applications that require both "push" and "pull" semantics, BOSH is significantly more bandwidth-efficient and responsive than most other bidirectional HTTP-based transport protocols and the techniques now commonly known as "Ajax". BOSH achieves this efficiency and low latency by using so-called "long polling" with multiple synchronous HTTP request/response pairs. Furthermore, BOSH can address the needs of constrained clients by employing fully-compliant HTTP 1.0 without the need for "cookies" (see &rfc2965;) <note>Requiring cookies is sub-optimal because several significant computing platforms provide only limited access to underlying HTTP requests/responses; worse, some platforms hide or remove cookie-related headers.</note> or even access to HTTP headers.</p>
+    <p>BOSH was originally developed in the Jabber/XMPP community as a replacement for an even earlier HTTP-based technology called &xep0025;. Although BOSH assumes that the "payload" of HTTP requests and responses will be XML, the payload formats are not limited to XMPP stanzas (see &xmppcore;) and could contain a mixture of elements qualified by namespaces defined by different protocols (e.g., both XMPP and JSON). This mix is necessary because some connection managers might not support <link url="#multi">Multiple Streams</link> and constrained clients often have no access to HTTP Pipelining (which limits them to one BOSH session at a time). BOSH connection managers are generally not required to understand anything about the XML content that they transport beyond perhaps ensuring that each XML payload is qualified by the correct namespace.</p>
+    <p>Note: &xep0206; documents some XMPP-specific extensions of this protocol that were formerly included in this document.</p>
+  </section1>
+  <section1 topic='Requirements' anchor='reqs'>
+    <p>The following design requirements reflect the need to offer performance as close as possible to a standard TCP connection.</p>
+    <ol>
+      <li>Compatible with constrained runtime environments* (e.g., mobile and browser-based clients).</li>
+      <li>Compatible with proxies that buffer partial HTTP responses.</li>
+      <li>Efficient through proxies that limit the duration of HTTP responses.</li>
+      <li>Fully compatible with HTTP/1.0.</li>
+      <li>Compatible with restricted network connections (e.g., firewalls, proxies, and gateways).</li>
+      <li>Fault tolerant (e.g., session recovers after an underlying TCP connection breaks at any stage during an HTTP request).</li>
+      <li>Extensible.</li>
+      <li>Consume significantly less bandwidth than polling-based protocols.</li>
+      <li>Significantly more responsive (lower latency) than polling-based protocols.</li>
+      <li>Support for polling (for clients that are limited to a single HTTP connection at a time).</li>
+      <li>In-order delivery of data.</li>
+      <li>Guard against unauthorized users injecting HTTP requests into a session.</li>
+      <li>Protect against denial of service attacks.</li>
+      <li>Multiplexing of data streams.</li>
+    </ol>
+    <p>*Note: Compatibility with constrained runtime environments implies the following restrictions:</p>
+    <ol>
+      <li>Clients are not required to have programmatic access to the headers of each HTTP request and response (e.g., cookies or status codes).</li>
+      <li>The body of each HTTP request and response is parsable XML with a single root element.</li>
+      <li>Clients can specify the Content-Type of the HTTP responses they receive.</li>
+    </ol>
+  </section1>
+  <section1 topic="Architectural Assumptions" anchor='arch'>
+    <p>This document assumes that most implementations will utilize a specialized connection manager ("CM") to handle HTTP connections rather than the native connection type for the relevant application (e.g., TCP connections in XMPP). Effectively, such a connection manager is a specialized HTTP server that translates between the HTTP requests and responses defined herein and the data streams (or API) implemented by the server with which it communicates, thus enabling a client to connect to a server via HTTP on port 80 or 443 instead of an application-specific port. We can illustrate this graphically as follows:</p>
+    <code><![CDATA[
+      Server
+        |
+        |  [unwrapped data streams]
+        |
+     HTTP CM
+        |
+        |  [HTTP + <body/> wrapper]
+        |
+      Client
+    ]]></code>
+    <p>This specification covers communication only between a client and the connection manager. It does not cover communication between the connection manager and the server, since such communications are implementation-specific (e.g., the server might natively support this HTTP binding, in which case the connection manager will be a logical entity rather than a physical entity; alternatively the connection manager might be an independent translating proxy such that the server might believe it is talking directly to the client over TCP; or the connection manager and the server might use a component protocol or an API defined by the server implementation).</p>
+    <p>Furthermore, no aspect of this protocol limits its use to communication between a client and a server. For example, it could be used for communication between a server and a peer server if such communication can occur for the relevant application (e.g., in XMPP). However, this document focuses exclusively on use of the transport by clients that cannot maintain arbitrary persistent TCP connections with a server. We assume that servers and components are under no such restrictions and thus would use the native connection transport for the relevant application. (However, on some unreliable networks, BOSH might enable more stable communication between servers.)</p>
+  </section1>
+  <section1 topic="The BOSH Technique" anchor='technique'>
+    <p>The technique employed by BOSH, which is sometimes called "HTTP long polling", reduces latency and bandwidth consumption over other HTTP polling techniques. When the client sends a request, the connection manager does not immediately send a response; instead it holds the request open until it has data to actually send to the client (or an agreed-to length of inactivity has elapsed). The client then immediately sends a new request to the connection manager, continuing the long polling loop.</p>
+    <p>If the connection manager does not have any data to send to the client after some agreed-to length of time<note>This time is typically on the order of tens of seconds (e.g., 60), and is determined during session creation</note>, it sends a response with an empty &lt;body/&gt;. This serves a similar purpose to whitespace keep-alives or &xep0199;; it helps keep a socket connection active which prevents some intermediaries (firewalls, proxies, etc) from silently dropping it, and helps to detect breaks in a reasonable amount of time.</p>
+    <p>Where clients and connection managers support persistent connections (i.e. "Connection: keep-alive" from HTTP/1.0, and which is the default state for HTTP/1.1), these sockets remain open for an extended length of time, awaiting the client's next request. This reduces the overhead of socket establishment, which can be very expensive if HTTP over Secure Sockets Layer (SSL) is used.</p>
+    <p>If the client has data to send while a request is still open, it establishes a second socket connection to the connection manager to send a new request. The connection manager immediately responds to the previously held request (possibly with no data) and holds open this new request. This results in the connections switching roles;  the "old" connection is responded to and left awaiting new requests, while the "new" connection is now used for the long polling loop.</p>
+    <p>The following diagram illustrates this technique (possibly after XMPP session establishment)</p>
+    <code><![CDATA[
+  |
+ +-+ <-- empty body request
+ |X|
+ |-|
+ | |
+ | |
+ | |
+ | |
+ |-| <-- empty body response
+ |*|
+ +-+
+  |
+ +-+ <-- empty body request
+ |X|
+ |-|
+ | |
+ | |
+ | |
+ | |
+ |-| <-- empty body response
+ |*|
+ +-+
+  |
+ +-+ <-- empty body request
+ |X|                                      socket opened --> === 
+ |-|                                                         |
+ | |                                    new message out --> +-+
+ |-| <-- empty body response                                |X|
+ |*|                                                        |-|
+ +-+                                                        | |
+  |                                                         | |
+  |                                                         | |
+  |                                                         | |
+  |                                 empty body response --> |-|
+  |                                                         |*|
+  |                                                         +-+
+  |                                                          |
+  |                                  empty body request --> +-+
+  |                                                         |X|
+  |                                                         |-|
+  |                                                         | |
+ +-+ <-- new message out                                    | |
+ |X|                                empty body response --> |-|
+ |-| <-- new message in                                     |*|
+ |*|                                                        +-+
+ +-+                                                         |
+  |                                                          |
+ +-+ <-- empty body request                                  |
+ |X|                                                         |
+ |-|                                                         |
+ | |                                                         |
+ | |                                    new message out --> +-+
+ |-| <-- new message in                                     |X|
+ |*|                                                        |-|
+ +-+                                                        | |
+  |                                                         | |
+  |                                                         | |
+  |                                                         | |
+  |                                 empty body response --> |-|
+  |                                                         |*|
+  |                                                         +-+
+  |                                                          |
+  |                                  empty body request --> +-+
+  |                                                         |X| 
+  |                                                         |-|
+  |                                                         | |
+  |                                                         | |
+  |                                                         | |
+  |                                                         | |
+  |                                 empty body response --> |-|
+  |                                                         |*|
+  |                                                         +-+
+  |                                                          |
+      ]]></code>
+  </section1>
+  <section1 topic="HTTP Overview" anchor='overview'>
+    <p>The requirements of <cite>RFC 2616</cite> MUST be met for both requests and responses. Additional HTTP headers not specified herein MAY be included, but receivers SHOULD ignore any such headers. Clients and connection managers MAY omit headers that are not mandated by <cite>RFC 2616</cite> and would otherwise be ignored (e.g. if the client has constrained bandwidth), but clients are advised that network and proxy policies could block such requests.</p>
+    <p>All information is encoded in the body of standard HTTP POST requests and responses. Each HTTP body contains a single &lt;body/&gt; wrapper which encapsulates the XML elements being transferred (see <link url="#wrapper">&lt;body/&gt; Wrapper Element</link>).</p>
+    <p>Clients SHOULD send all HTTP requests over a single persistent HTTP/1.1 connection using HTTP Pipelining. However, a client MAY deliver its POST requests in any way permitted by <cite>RFC 1945</cite> or <cite>RFC 2616</cite>. For example, constrained clients can be expected to open more than one persistent connection instead of using Pipelining, or in some cases to open a new HTTP/1.0 connection to send each request. However, clients and connection managers SHOULD NOT use Chunked Transfer Coding, since intermediaries might buffer each partial HTTP request or response and only forward the full request or response once it is available.</p>
+    <p>Clients MAY include an HTTP Accept-Encoding header in any request. If the connection manager receives a request with an Accept-Encoding header, it MAY include an HTTP Content-Encoding header in the response (indicating one of the encodings specified in the request) and compress the response body accordingly.</p>
+    <p>Each BOSH session MAY share the HTTP connection(s) it uses with other HTTP traffic, including other BOSH sessions and HTTP requests and responses completely unrelated to this protocol (e.g., web page downloads). However, the responses to requests that are not part of the session sent over the same connection using HTTP pipelining (or queued to be sent over the same connection) might be delayed if they were sent while a request that is part of the session is being held (since the connection manager MUST send its responses in the same order that the requests were received, and the connection manager typically delays its responses).</p>
+    <p>The HTTP Content-Type header of all client requests SHOULD be "text/xml; charset=utf-8". However, clients MAY specify another value if they are constrained to do so (e.g., "application/x-www-form-urlencoded" or "text/plain"). The client and connection manager SHOULD ignore all HTTP Content-Type headers they receive.</p>
+  </section1>
+  <section1 topic="&lt;body/&gt; Wrapper Element" anchor='wrapper'>
+    <p>The body of each HTTP request and response contains a single &lt;body/&gt; wrapper element qualified by the 'http://jabber.org/protocol/httpbind' namespace. The content of the wrapper is the data being transferred. The &lt;body/&gt; element and its content together MUST conform to the specifications set out in &w3xml;. They SHOULD also conform to &w3xmlnamespaces;. The content MUST NOT contain any of the following (all defined in <cite>XML 1.0</cite>):</p>
+    <ul>
+      <li><p>Partial XML elements</p></li>
+      <li><p>XML comments</p></li>
+      <li><p>XML processing instructions</p></li>
+      <li><p>Internal or external DTD subsets</p></li>
+      <li><p>Internal or external entity references (with the exception of predefined entities)</p></li>
+    </ul>
+    <p>The &lt;body/&gt; wrapper MUST NOT contain any XML character data, although its child elements MAY contain character data. The &lt;body/&gt; wrapper MUST contain zero or more complete XML immediate child elements (called "payloads" in this document, e.g., XMPP stanzas as defined in <cite>RFC 6120</cite> or elements containing XML character data that represents objects using the JSON data interchange format as defined in &rfc4627;). Each &lt;body/&gt; wrapper MAY contain payloads qualified under a wide variety of different namespaces.</p>
+    <p>The &lt;body/&gt; element of every client request MUST possess a sequential request ID encapsulated via the 'rid' attribute; for details, refer to the <link url="#rids">Request IDs</link> section of this document.</p>
+  </section1>
+  <section1 topic="Initiating a BOSH Session" anchor='session'>
+    <section2 topic="Session Creation Request" anchor='session-request'>
+      <p>The first request from the client to the connection manager requests a new session.</p>
+      <p>The &lt;body/&gt; element of the first request SHOULD possess the following attributes (they SHOULD NOT be included in any other requests except as specified under <link url="#multi-add">Adding Streams To A Session</link>):</p>
+      <ul>
+        <li><strong>'to'</strong> -- This attribute specifies the target domain of the first stream.</li>
+        <li><strong>'xml:lang'</strong> -- This attribute (as defined in Section 2.12 of &w3xml;) specifies the default language of any human-readable XML character data sent or received during the session.</li>
+        <li><strong>'ver'</strong> -- This attribute specifies the highest version of the BOSH protocol that the client supports. The numbering scheme is "&lt;major&gt;.&lt;minor&gt;" (where the minor number MAY be incremented higher than a single digit, so it MUST be treated as a separate integer). Note: The 'ver' attribute should not be confused with the version of any protocol being transported.</li>
+        <li><strong>'wait'</strong> -- This attribute specifies the longest time (in seconds) that the connection manager is allowed to wait before responding to any request during the session. This enables the client to limit the delay before it discovers any network failure, and to prevent its HTTP/TCP connection from expiring due to inactivity.</li>
+        <li><strong>'hold'</strong> -- This attribute specifies the maximum number of requests the connection manager is allowed to keep waiting at any one time during the session. If the client is not able to use HTTP Pipelining then this SHOULD be set to "1".</li>
+      </ul>
+      <p>Note: Clients that only support <link url="#poll">Polling Sessions</link> MAY prevent the connection manager from waiting by setting 'wait' or 'hold' to "0". However, polling is NOT RECOMMENDED since the associated increase in bandwidth consumption and the decrease in responsiveness are both typically one or two orders of magnitude!</p>
+      <p>A connection manager MAY be configured to enable sessions with more than one server in different domains. When requesting a session with such a "proxy" connection manager, a client SHOULD include a <strong>'route'</strong> attribute that specifies the protocol, hostname, and port of the server with which it wants to communicate, formatted as "proto:host:port" (e.g., "xmpp:example.com:9999"). <note>Although the syntax of the 'route' attribute bears a superficial resemblance to a URI or IRI, it is not a URI/IRI and MUST NOT be processed in accordance with the rules specified in <cite>RFC 3986</cite>, <cite>RFC 3987</cite>, or (for XMPP) <cite>RFC 5122</cite>.</note> A connection manager that is configured to work only with a single server (or only with a defined list of domains and the associated list of hostnames and ports that are serving those domains) MAY ignore the 'route' attribute. (Note that the 'to' attribute specifies the domain being served, not the hostname of the machine that is serving the domain.)</p>
+      <p>The &lt;body/&gt; element of the first request MAY also possess a <strong>'from'</strong> attribute, which specifies the originator of the first stream and which enables the connection manager to forward the originating entity's identity to the application server (e.g., the JabberID of an entity that is connecting to an XMPP server; see <cite>XEP-0206</cite>).</p>
+      <p>A client MAY include an <strong>'ack'</strong> attribute (set to "1") to indicate that it will be using acknowledgements throughout the session and that the absence of an 'ack' attribute in any request is meaningful (see <link url="#ack">Acknowledgements</link>).</p>
+      <p>Some clients are constrained to only accept HTTP responses with specific Content-Types (e.g., "text/html"). The &lt;body/&gt; element of the first request MAY possess a <strong>'content'</strong> attribute. This specifies the value of the HTTP Content-Type header that MUST appear in all the connection manager's responses during the session. If the client request does not possess a 'content' attribute, then the HTTP Content-Type header of responses MUST be "text/xml; charset=utf-8".</p>
+      <example caption="Requesting a BOSH session">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 104
+
+<body content='text/xml; charset=utf-8'
+      from='user@example.com'
+      hold='1'
+      rid='1573741820'
+      to='example.com'
+      route='xmpp:example.com:9999'
+      ver='1.6'
+      wait='60'
+      ack='1'
+      xml:lang='en'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>Note: All requests after the first one MUST include a valid 'sid' attribute (provided by the connection manager in the <link url="#session-response">Session Creation Response</link>). The initialization request is unique in that the &lt;body/&gt; element MUST NOT possess a 'sid' attribute.</p>
+    </section2>
+    <section2 topic="Session Creation Response" anchor='session-response'>
+      <p>After receiving a new session request, the connection manager MUST generate an opaque, unpredictable session identifier (or SID). The SID MUST be unique within the context of the connection manager application. The &lt;body/&gt; element of the connection manager's response to the client's session creation request MUST possess the following attributes (they SHOULD NOT be included in any other responses):</p>
+      <ul>
+        <li><strong>'sid'</strong> -- This attribute specifies the SID</li>
+        <li><strong>'wait'</strong> -- This is the longest time (in seconds) that the connection manager will wait before responding to any request during the session. The time MUST be less than or equal to the value specified in the session request.</li>
+        <li><strong>'hold'</strong> -- This attribute informs the client about the maximum number of requests the connection manager will keep waiting at any one time during the session. This value MUST NOT be greater than the value specified by the client in the session request.</li>
+      </ul>
+      <p>The &lt;body/&gt; element SHOULD also include the following attributes (they SHOULD NOT be included in any other responses):</p>
+      <ul>
+        <li><strong>'ver'</strong> -- This attribute specifies the highest version of the BOSH protocol that the connection manager supports, or the version specified by the client in its request, whichever is lower.</li>
+        <li><strong>'polling'</strong> -- This attribute specifies the shortest allowable polling interval (in seconds). This enables the client to not send empty request elements more often than desired (see <link url="#poll">Polling Sessions</link> and <link url="#overactive">Overactivity</link>).</li>
+        <li><strong>'inactivity'</strong> -- This attribute specifies the longest allowable inactivity period (in seconds). This enables the client to ensure that the periods with no requests pending are never too long (see <link url="#poll">Polling Sessions</link> and <link url="#inactive">Inactivity</link>).</li>
+        <li><strong>'requests'</strong> -- This attribute enables the connection manager to limit the number of simultaneous requests the client makes (see <link url="#overactive">Overactivity</link> and <link url="#poll">Polling Sessions</link>). The RECOMMENDED values are either "2" or one more than the value of the 'hold' attribute specified in the session request.</li>
+        <li><strong>'requests'</strong> -- This attribute enables the connection manager to limit the number of simultaneous requests the client makes (see <link url="#overactive">Overactivity</link> and <link url="#poll">Polling Sessions</link>). This value must be larger than the 'hold' attribute value specified in the session request.  The RECOMMENDED value is one more than the value of the 'hold' attribute specified in the session request.</li>
+        <li><strong>'to'</strong> -- This attribute communicates the identity of the backend server to which the client is attempting to connect.</li>
+      </ul>
+      <p>The connection manager MAY include an <strong>'accept'</strong> attribute in the session creation response element, to specify a comma-separated list of the content encodings it can decompress. After receiving a session creation response with an 'accept' attribute, clients MAY include an HTTP Content-Encoding header in subsequent requests (indicating one of the encodings specified in the 'accept' attribute) and compress the bodies of the requests accordingly.</p>
+      <p>A connection manager MAY include an <strong>'ack'</strong> attribute (set to the value of the 'rid' attribute of the session creation request) to indicate that it will be using acknowledgements throughout the session and that the absence of an 'ack' attribute in any response is meaningful (see <link url="#ack">Acknowledgements</link>).</p>
+      <p>If the connection manager supports session pausing (see <link url="#inactive">Inactivity</link>) then it SHOULD advertise that to the client by including a <strong>'maxpause'</strong> attribute in the session creation response element. The value of the attribute indicates the maximum length of a temporary session pause (in seconds) that a client can request.</p>
+      <p>For both requests and responses, the &lt;body/&gt; element and its content SHOULD be UTF-8 encoded. If the HTTP Content-Type header of a request/response specifies a character encoding other than UTF-8, then the connection manager MAY convert between UTF-8 and the other character encoding. However, even in this case, it is OPTIONAL for the connection manager to convert between encodings. The connection manager MAY inform the client which encodings it can convert by setting the optional <strong>'charsets'</strong> attribute in the session creation response element to a space-separated list of encodings. <note>Each character set name (or character encoding name -- we use the terms interchangeably) SHOULD be of type NMTOKEN, where the names are separated by the white space character #x20, resulting in a tokenized attribute type of NMTOKENS (see Section 3.3.1 of &w3xml;). Strictly speaking, the Character Sets registry maintained by the Internet Assigned Numbers Authority (see &lt;<link url='http://www.iana.org/assignments/character-sets'>http://www.iana.org/assignments/character-sets</link>&gt;) allows a character set name to contain any printable US-ASCII character, which might include characters not allowed by the NMTOKEN construction of XML 1.0; however, the only existing character set name which includes such a character is "NF_Z_62-010_(1973)".</note></p>
+      <p>As soon as the connection manager has established a connection to the server and discovered its identity, it MAY forward the identity to the client by including a <strong>'from'</strong> attribute in a response, either in its session creation response, or (if it has not received the identity from the server by that time) in any subsequent response to the client.</p>
+      <example caption="Session creation response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 128
+
+<body wait='60'
+      inactivity='30'
+      polling='5'
+      requests='2'
+      hold='1'
+      ack='1573741820'
+      accept='deflate,gzip'
+      maxpause='120'
+      sid='SomeSID'
+      charsets='ISO_8859-1 ISO-2022-JP'
+      ver='1.6'
+      from='example.com'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+
+
+      <example caption="Subsequent response with 'from' attribute">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 128
+
+<body from='example.com'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    </section2>
+  </section1>
+  <section1 topic="Sending and Receiving XML Payloads" anchor='payloads'>
+    <p>After the client has successfully completed all required preconditions, it can send and receive XML payloads via the HTTP binding.</p>
+    <example caption="Transmitting payloads">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 188
+
+<body rid='1249243562'
+      sid='SomeSID'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <message to='contact@example.com'
+           xmlns='jabber:client'>
+    <body>Good morning!</body>
+  </message>
+  <message to='friend@example.com'
+           xmlns='jabber:client'>
+    <body>Hey, what&apos;s up?</body>
+  </message>
+</body>]]></example>
+    <p>Upon receipt of a request, the connection manager SHOULD forward the content of the &lt;body/&gt; element to the server as soon as possible. In any case it MUST forward the content from different requests in the order specified by their 'rid' attributes.</p>
+    <p>The connection manager MUST also return an HTTP 200 OK response with a &lt;body/&gt; element to the client. Note: This does not indicate that the payloads have been successfully delivered to the application server.</p>
+    <p>It is RECOMMENDED that the connection manager not return an HTTP result until a payload has arrived from the application server for delivery to the client. However, the connection manager SHOULD NOT wait longer than the time specified by the client in the 'wait' attribute of its <link url="#session-request">Session Creation Request</link>, and it SHOULD NOT keep more HTTP requests waiting at a time than the number specified in the 'hold' attribute of the session creation request. In any case it MUST respond to requests in the order specified by their 'rid' attributes.</p>
+    <p>If there are no payloads waiting or ready to be delivered within the waiting period, then the connection manager SHOULD include an empty &lt;body/&gt; element in the HTTP result:</p>
+    <example caption="Empty response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 64
+
+<body xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>If the connection manager has received one or more payloads from the application server for delivery to the client, then it SHOULD return the payloads in the body of its response as soon as possible after receiving them from the server. The example below includes payloads qualified by different namespaces:</p>
+    <example caption="Response with queued stanza">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 185
+
+<body xmlns='http://jabber.org/protocol/httpbind'
+      xmlns:json='http://json.org/'>
+  <message from='contact@example.com'
+           to='user@example.com'
+           xmlns='jabber:client'>
+    <body>Good morning to you!</body>
+  </message>
+  <message from='friend@example.com'
+           to='user@example.com'
+           xmlns='jabber:client'>
+    <body>Not much, how about with you?</body>
+  </message>
+  <json:json>
+  [
+    {
+      "precision": "zip",
+      "Latitude":  37.7668,
+      "Longitude": -122.3959,
+      "Address":   "",
+      "City":      "SAN FRANCISCO",
+      "State":     "CA",
+      "Zip":       "94107",
+      "Country":   "US"
+    },
+    {
+      "precision": "zip",
+      "Latitude":  37.371991,
+      "Longitude": -122.026020,
+      "Address":   "",
+      "City":      "SUNNYVALE",
+      "State":     "CA",
+      "Zip":       "94085",
+      "Country":   "US"
+    }
+  ]
+  </json:json>
+</body>]]></example>
+    <p>The client MAY poll the connection manager for incoming payloads by sending an empty &lt;body/&gt; element.</p>
+    <example caption="Requesting XML Payloads">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 88
+
+<body rid='1249243563'
+      sid='SomeSID'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>The connection manager MUST wait and respond in the same way as it does after receiving payloads from the client.</p>
+  </section1>
+  <section1 topic='Acknowledgements' anchor='ack'>
+    <section2 topic='Request Acknowledgements' anchor='ack-request'>
+      <p>When responding to a request that it has been holding, if the connection manager finds it has already received another request with a higher 'rid' attribute (typically while it was holding the first request), then it MAY acknowledge the reception to the client. The connection manager MAY set the 'ack' attribute of any response to the value of the highest 'rid' attribute it has received in the case where it has also received all requests with lower 'rid' values.</p>
+      <example caption="Response with request acknowledgement">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 64
+
+<body ack='1249243564'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>If the connection manager will be including 'ack' attributes on responses during a session, then it MUST include an 'ack' attribute in its session creation response, and set the 'ack' attribute of responses throughout the session. The only exception is that, after its session creation response, the connection manager SHOULD NOT include an 'ack' attribute in any response if the value would be the 'rid' of the request being responded to.</p>
+      <p>If the connection manager is permitted to hold more than one request at a time, then the reception of a lower-than-expected 'ack' value from the connection manager (or the unexpected abscence of an 'ack' attribute) can give the client an early warning that a network failure might have occurred (e.g., if the client believes the connection manager should have received another request by the time it responded).</p>
+    </section2>
+    <section2 topic='Response Acknowledgements' anchor='ack-response'>
+      <p>The client MAY similarly inform the connection manager about the responses it has received by setting the 'ack' attribute of any request to the value of the highest 'rid' of a request for which it has already received a response in the case where it has also received all responses associated with lower 'rid' values. If the client will be including 'ack' attributes on requests during a session, then it MUST include an 'ack' attribute (set to '1') in its session creation request, and set the 'ack' attribute of requests throughout the session. The only exception is that, after its session creation request, the client SHOULD NOT include an 'ack' attribute in any request if it has received responses to all its previous requests.</p>
+      <example caption="Request with response acknowledgement">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 88
+
+<body rid='1249243566'
+      sid='SomeSID'
+      ack='1249243564'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>After receiving a request with an 'ack' value less than the 'rid' of the last request that it has already responded to, the connection manager MAY inform the client of the situation by sending its next response immediately instead of waiting until it has payloads to send to the client (e.g., if some time has passed since it responded). In this case it SHOULD include a 'report' attribute set to one greater than the 'ack' attribute it received from the client, and a 'time' attribute set to the number of milliseconds since it sent the response associated with the 'report' attribute.</p>
+      <example caption="Response with report">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 64
+
+<body report='1249243565'
+      time='852'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>Upon reception of a response with 'report' and 'time' attributes, if the client has still not received the response associated with the request identifier specified by the 'report' attribute, then it MAY choose to resend the request associated with the missing response (see  <link url="#rids-broken">Broken Connections</link>).</p>
+    </section2>
+  </section1>
+  <section1 topic='Inactivity' anchor='inactive'>
+    <p>After receiving a response from the connection manager, if none of the client's requests are still being held by the connection manager (and if the session is not a <link url="#poll">Polling Session</link>), the client SHOULD make a new request as soon as possible. In any case, if no requests are being held, the client MUST make a new request before the maximum inactivity period has expired. The length of this period (in seconds) is specified by the 'inactivity' attribute in the session creation response.</p>
+    <p>If the connection manager has responded to all the requests it has received within a session and the time since its last response is longer than the maximum inactivity period, then it SHOULD assume the client has been disconnected and terminate the session without informing the client. If the client subsequently makes another request, then the connection manager SHOULD respond as if the session does not exist.</p>
+    <p>If the connection manager did not specify a maximum inactivity period in the session creation response, then it SHOULD allow the client to be inactive for as long as it chooses.</p>
+    <p>If the session is not a polling session then the connection manager SHOULD specify a relatively short inactivity period to ensure that disconnections are discovered as quickly as possible. The RECOMMENDED time would be a little more than the number of seconds for a comfortable network round trip between the connection manager and the client under difficult network conditions (since the client can be expected to make a new request immediately -- see above).</p>
+    <p>If a client encounters an exceptional temporary situation during which it will be unable to send requests to the connection manager for a period of time greater than the maximum inactivity period (e.g., while a runtime environment changes from one web page to another), and if the connection manager included a 'maxpause' attribute in its <link url="#session-response">Session Creation Response</link>, then the client MAY request a temporary increase to the maximum inactivity period by including a 'pause' attribute in a request. Note: If the connection manager did not specify a 'maxpause' attribute at the start of the session then the client MUST NOT send a 'pause' attribute during the session.</p>
+    <example caption="Requesting a Session Pause">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 98
+
+<body rid='1249243564'
+      sid='SomeSID'
+      pause='60'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>Upon reception of a session pause request, if the requested period is not greater than the maximum permitted time, then the connection manager SHOULD respond immediately to all pending requests (including the pause request) and <em>temporarily</em> increase the maximum inactivity period to the requested time. Note: The response to the pause request MUST NOT contain any payloads.</p>
+    <p>Note: If the client simply wants the connection manager to return all the requests it is holding then it MAY set the value of the 'pause' attribute to be the value of the 'inactivity' attribute in the connection manager's session creation response. (If the client believes it is in danger of becoming disconnected indefinitely then it MAY even request a temporary reduction of the maximum inactivity period by specifying a 'pause' value less than the 'inactivity' value, thus enabling the connection manager to discover any subsequent disconnection more quickly.)</p>
+    <p>The connection manager SHOULD set the maximum inactivity period back to normal upon reception of the next request from the client (assuming the connection manager has not already terminated the session).</p>
+  </section1>
+  <section1 topic='Overactivity' anchor='overactive'>
+    <p>The client SHOULD NOT make more simultaneous requests than specified by the 'requests' attribute in the connection manager's <link url="#session-response">Session Creation Response</link>. However the client MAY make one additional request if it is to <link url="#inactive">pause</link> or <link url="#terminate">terminate</link> a session.</p>
+    <p>If during any period the client sends a sequence of new requests (i.e. requests with incremented rid attributes, not repeat requests) longer than the number specified by the 'requests' attribute, and if the connection manager has not yet responded to any of the requests, and if the last request did not include either a 'pause' attribute or a 'type' attribute set to "terminate", then the connection manager SHOULD consider that the client is making too many simultaneous requests, and terminate the HTTP session with a 'policy-violation' terminal binding error to the client. Note: This behavior applies to equally to normal and polling sessions.</p>
+    <example caption="Too many simultaneous requests response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='policy-violation'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>Note: If the connection manager did not specify a 'requests' attribute in the session creation response, then it MUST allow the client to send as many simultaneous requests as it chooses.</p>
+    <p>If during any period the client sends a sequence of new requests equal in length to the number specified by the 'requests' attribute, and if the connection manager has not yet responded to any of the requests, and if the last request was empty and did not include either a 'pause' attribute or a 'type' attribute set to "terminate", and if the last two requests arrived within a period shorter than the number of seconds specified by the 'polling' attribute in the session creation response, then the connection manager SHOULD consider that the client is making requests more frequently than it was permitted and terminate the HTTP session and return a 'policy-violation' terminal binding error to the client. Note: the behavior for <link url="#poll">Polling Sessions</link> is slightly different.</p>
+    <example caption="Too frequent requests response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='policy-violation'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>Note: If the connection manager did not specify a 'polling' attribute in the session creation response, then it MUST allow the client to send requests as frequently as it chooses.</p>
+  </section1>
+  <section1 topic='Polling Sessions' anchor='poll'>
+    <p>It is not always possible for a constrained client to either use HTTP Pipelining or open more than one HTTP connection with the connection manager at a time. In this case the client SHOULD inform the connection manager by setting the values of the 'wait' and/or 'hold' attributes in its session creation request to "0", and then "poll" the connection manager at regular intervals throughout the session for payloads it might have received from the server. Note: Even if the client does not request a polling session, the connection manager MAY require a client to use polling by setting the 'requests' attribute (which specifies the number of simultaneous requests the client can make) of its <link url="#session-response">Session Creation Response</link> to "1", however this is NOT RECOMMENDED.</p>
+    <p>If a session will use polling, the connection manager SHOULD specify a higher than normal value for the 'inactivity' attribute (see <link url="#inactive">Inactivity</link>) in its session creation response. The increase SHOULD be greater than the value it specifies for the 'polling' attribute.</p>
+    <p>If the client sends two consecutive empty new requests (i.e. requests with incremented rid attributes, not repeat requests) within a period shorter than the number of seconds specified by the 'polling' attribute (the shortest allowable polling interval) in the session creation response, and if the connection manager's response to the first request contained no payloads, then upon reception of the second request the connection manager SHOULD terminate the HTTP session and return a 'policy-violation' terminal binding error to the client.</p>
+    <example caption="Too frequent polling response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='policy-violation'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>Note: If the connection manager did not specify a 'polling' attribute in the session creation response, then it MUST allow the client to poll as frequently as it chooses.</p>
+  </section1>
+  <section1 topic='Terminating the BOSH Session' anchor='terminate'>
+    <p>At any time, the client MAY gracefully terminate the session by sending a &lt;body/&gt; element with a 'type' attribute set to "terminate". The termination request MAY include one or more payloads that the connection manager MUST forward to the server to ensure graceful logoff.</p>
+    <example caption="Session termination by client">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 153
+
+<body rid='1249243565'
+      sid='SomeSID'
+      type='terminate'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <presence type='unavailable'
+            xmlns='jabber:client'/>
+</body>]]></example>
+    <p>The connection manager SHOULD respond to this request with an HTTP 200 OK containing an empty &lt;body/&gt; element.</p>
+      <example caption="Connection manager acknowledges termination">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 72
+
+<body type='terminate'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>Upon receiving the response, the client MUST consider the HTTP session to have been terminated.</p>
+  </section1>
+  <section1 topic="Request IDs" anchor='rids'>
+    <section2 topic='Generation' anchor='rids-syntax'>
+      <p>The client MUST generate a large, random, positive integer for the initial 'rid' (see <link url="#security">Security Considerations</link>) and then increment that value by one for each subsequent request. The client MUST take care to choose an initial 'rid' that will never be incremented above 9007199254740991 <note>9007199254740991 is 2<span class='super'>53</span>-1. Some weakly typed languages use IEEE Standard 754 Doubles to represent all numbers. These Doubles cannot represent integers above 2<span class='super'>53</span> accurately.</note> within the session. In practice, a session would have to be extraordinarily long (or involve the exchange of an extraordinary number of packets) to exceed the defined limit.</p>
+    </section2>
+    <section2 topic='In-Order Message Forwarding' anchor='rids-order'>
+      <p>When a client makes simultaneous requests, the connection manager might receive them out of order. The connection manager MUST forward the payloads to the server and respond to the client requests in the order specified by the 'rid' attributes. The client MUST process responses received from the connection manager in the order the requests were made.</p>
+      <p>The connection manager SHOULD expect the 'rid' attribute to be within a window of values greater than the 'rid' of the previous request. The size of the window is equal to the maximum number of simultaneous requests allowed by the connection manager. If it receives a request with a 'rid' greater than the values in the window, then the connection manager MUST terminate the session with an error:</p>
+      <example caption="Unexpected rid error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='item-not-found'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    </section2>
+    <section2 topic='Broken Connections' anchor='rids-broken'>
+      <p>Unreliable network communications or client constraints can result in broken connections. The connection manager SHOULD remember the 'rid' and the associated HTTP response body of the client's most recent requests which were not session pause requests (see <link url="#inactive">Inactivity</link>) and which did not result in an HTTP or binding error. The number of responses to non-pause requests kept in the buffer SHOULD be either the same as the maximum number of simultaneous requests allowed by the connection manager or, if <link url="#ack">Acknowledgements</link> are being used, the number of responses that have not yet been acknowledged.</p>
+      <p>If the network connection is broken or closed before the client receives a response to a request from the connection manager, then the client MAY resend an exact copy of the original request. Whenever the connection manager receives a request with a 'rid' that it has already received, it SHOULD return an HTTP 200 (OK) response that includes the buffered copy of the original XML response to the client (i.e., a &lt;body/&gt; wrapper possessing appropriate attributes and optionally containing one or more XML payloads).</p>
+      <p>If the connection manager receives a request for a 'rid' which has already been received but to which it has not yet responded then it SHOULD respond immediately to the existing request with a recoverable binding condition (see <link url="#errorstatus-recover">Recoverable Binding Conditions</link>) and send any future response to the latest request. There is a possibility that a client might subvert polling frequency limits by deliberately sending requests for the same 'rid' multiple times, and so a connection manager implementation MAY choose to impose a limit to the frequency or number of requests for the same 'rid'. If the client exceeds this limit then the connection manager SHOULD terminate the HTTP session and return a 'policy-violation' terminal binding error to the client (see <link url="#errorstatus-terminal">Terminal Binding Conditions</link>).</p>
+      <p>If the original response is not available (e.g., it is no longer in the buffer), then the connection manager MUST return an 'item-not-found' terminal binding error:</p>
+      <example caption="Response not in buffer error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='item-not-found'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>Note: The error is the same whether the 'rid' is too large or too small. This makes it more difficult for an attacker to discover an acceptable value.</p>
+    </section2>
+  </section1>
+  <section1 topic="Protecting Insecure Sessions" anchor='keys'>
+    <section2 topic="Applicability" anchor='keys-applic'>
+      <p>The OPTIONAL key sequencing mechanism described here MAY be used if the client's session with the connection manager is not secure. The session SHOULD be considered secure only if all client requests are made via SSL (or TLS) HTTP connections and the connection manager generates an unpredictable session ID. If the session is secure, it is not necessary to use this key sequencing mechanism.</p>
+      <p>Even if the session is not secure, the unpredictable session and request IDs specified in the preceding sections of this document already provide a level of protection similar to that provided by a connection bound to a single pair of persistent TCP/IP connections, and thus provide sufficient protection against a 'blind' attacker. However, in some circumstances, the key sequencing mechanism defined below helps to protect against a more determined and knowledgeable attacker.</p>
+      <p>It is important to recognize that the key sequencing mechanism defined below helps to protect only against an attacker who is able to view the contents of all requests or responses in an insecure session but who is not able to alter the contents of those requests (in this case, the mechanism prevents the attacker from injecting HTTP requests into the session, e.g., termination requests or responses). However, the key sequencing mechanism does not provide any protection when the attacker is able to alter the contents of insecure requests or responses.</p>
+    </section2>
+    <section2 topic="Introduction" anchor='keys-intro'>
+      <p>The HTTP requests of each session MAY be spread across a series of different socket connections. This would enable an unauthorized user that obtains the session ID and request ID of a session to then use their own socket connection to inject &lt;body/&gt; request elements into the session and receive the corresponding responses.</p>
+      <p>The key sequencing mechanism below protects against such attacks by enabling a connection manager to detect &lt;body/&gt; request elements injected by a third party.</p>
+    </section2>
+    <section2 topic="Generating the Key Sequence" anchor='keys-generate'>
+      <p>Prior to requesting a new session, the client MUST select an unpredictable counter ("n") and an unpredictable value ("seed"). The client then processes the "seed" through a cryptographic hash and converts the resulting 160 bits to a hexadecimal string K(1). It does this "n" times to arrive at the initial key K(n). The hashing algorithm MUST be SHA-1 as defined in &rfc3174;.</p>
+      <example caption="Creating the key sequence">
+        K(1) = hex(SHA-1(seed))
+        K(2) = hex(SHA-1(K(1)))
+        ...
+        K(n) = hex(SHA-1(K(n-1)))
+      </example>
+      <p>Because case is not significant in hexadecimal encoding, key comparisons SHOULD be case insensitive.</p>
+    </section2>
+    <section2 topic="Use of Keys" anchor='keys-use'>
+      <p>The client MUST set the 'newkey' attribute of the first request in the session to the value K(n).</p>
+      <example caption="Session Request with Initial Key">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 104
+
+<body content='text/xml; charset=utf-8'
+      hold='1'
+      rid='1573741820'
+      to='example.com'
+      wait='60'
+      xml:lang='en'
+      newkey='ca393b51b682f61f98e7877d61146407f3d0a770'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    <p>The client MUST set the 'key' attribute of all subsequent requests to the value of the next key in the generated sequence (decrementing from K(n-1) towards K(1) with each request sent).</p>
+    <example caption="Request with Key">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 88
+
+<body rid='1573741821'
+      sid='SomeSID'
+      key='bfb06a6f113cd6fd3838ab9d300fdb4fe3da2f7d'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>The connection manager MAY verify the key by calculating the SHA-1 hash of the key and performing a case insensitive comparison of it to the 'newkey' attribute of the previous request (or the 'key' attribute if the 'newkey' attribute was not set). If the values do not match (or if it receives a request without a 'key' attribute and the 'newkey' or 'key' attribute of the previous request was set), then the connection manager MUST NOT process the element, MUST terminate the session, and MUST return an 'item-not-found' terminal binding error.</p>
+      <example caption="Invalid Key Sequence Error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='item-not-found'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    </section2>
+    <section2 topic="Switching to Another Key Sequence" anchor='keys-switch'>
+      <p>A client SHOULD choose a high value for "n" when generating the key sequence. However, if the session lasts long enough that the client arrives at the last key in the sequence K(1) then the client MUST switch to a new key sequence.</p>
+      <p>The client MUST:</p>
+      <ol>
+        <li>Choose new values for "seed" and "n".</li>
+        <li>Generate a new key sequence using the algorithm defined above.</li>
+        <li>Set the 'key' attribute of the request to the next value in the old sequence (i.e. K(1), the last value).</li>
+        <li>Set the 'newkey' attribute of the request to the value K(n) from the new sequence.</li>
+      </ol>
+      <example caption="New Key Sequence">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 188
+
+<body rid='1573741822'
+      sid='SomeSID'
+      key='6f825e81f4532b2c5fa2d12457d8a1f22e8f838e'
+      newkey='113f58a37245ec9637266cf2fb6e48bfeaf7964e'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <message to='contact@example.com'
+           xmlns='jabber:client'>
+    <body>I said "Hi!"</body>
+  </message>
+</body>]]></example>
+    </section2>
+  </section1>
+
+  <section1 topic='Multiple Streams' anchor='multi'>
+    <section2 topic="Introduction" anchor='multi-intro'>
+      <p>The OPTIONAL feature described in this section enables multiple XML streams to be contained within a single HTTP session. This feature is essential in runtime environments that prevent HTTP Pipelining, thereby constraining the number of simultaneous HTTP requests a client can make to each connection manager, since clients running in such environments need multi-stream sessions if they are to connect using more than one account at the same time. This feature also reduces network traffic for any client that needs to establish parallel streams over HTTP.</p>
+    </section2>
+    <section2 topic="Discovery" anchor='multi-discover'>
+      <p>If a connection manager supports the multi-streams feature, it MUST include a 'stream' attribute in its <link url="#session-response">Session Creation Response</link>. If a client does not receive the 'stream' attribute then it MUST assume that the connection manager does not support the feature. <note>Therefore a client and a connection manager will be compatible even if one or the other offers no support for multi-stream sessions.</note></p>
+      <p>The 'stream' attribute identifies the first stream to be opened for the session. The value of each 'stream' attribute MUST be an opaque and unpredictable name that is unique within the context of the connection manager application.</p>
+      <example caption="Session creation response with stream name">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 128
+
+<body wait='60'
+      inactivity='30'
+      polling='5'
+      requests='2'
+      hold='1'
+      accept='deflate,gzip'
+      stream='firstStreamName'
+      maxpause='120'
+      sid='SomeSID'
+      charsets='ISO_8859-1 ISO-2022-JP'
+      ver='1.6'
+      from='example.com'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    </section2>
+    <section2 topic="Adding Streams To A Session" anchor='multi-add'>
+      <p>If the connection manager included a 'stream' attribute in its session creation response then the client MAY ask it to open another stream at any time by sending it an empty &lt;body/&gt; element with a 'to' attribute. The request MUST include valid 'sid' and 'rid' <note>The 'rid' attribute is always incremented normally without reference to any 'stream' attribute.</note> attributes, and SHOULD also include an 'xml:lang' attribute. The request MAY include either 'route' or 'from' attributes (see <link url="#session-request">Session Creation Request</link>), but it SHOULD NOT include 'ver', 'content', 'hold' or 'wait' attributes (since a new session is not being created).</p>
+      <example caption="Requesting another stream">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 104
+
+<body sid='SomeSID'
+      rid='1573741820'
+      to='example.com'
+      route='xmpp:example.com:9999'
+      xml:lang='en'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>If the connection manager did not indicate its support for multiple streams at the start of the session, then it MUST ignore the extra attributes and treat the request as a normal empty request for payloads (see <link url="#payloads">Sending and Receiving XML Payloads</link>). <note>This helps to ensure backwards-compatibility with older implementations.</note> Otherwise it MUST open a new stream with the specified server (see <link url="#session-response">Session Creation Response</link>), generate a new stream name, and respond to the client with the name. The response MAY also include the 'from' attribute, but it SHOULD NOT include 'sid', 'requests', 'polling', 'hold', 'inactivity', 'maxpause', 'accept', 'charsets', 'ver' or 'wait' attributes.</p>
+      <example caption="Add stream response">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 128
+
+<body stream='secondStreamName'
+      from='example.com'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>Note: If the response did not include a 'from' attribute then they MAY be sent in a subsequent response instead (see <link url="#session-response">Session Creation Response</link>). In that case the 'stream' attribute MUST also be specified.</p>
+    </section2>
+    <section2 topic="Transmitting Payloads" anchor='multi-transmit'>
+      <p>If more than one stream has been opened within a session, then all non-empty &lt;body/&gt; elements sent by the connection manager MUST include a 'stream' attribute that specifies which stream <em>all</em> the payloads it contains belong to. The client SHOULD include a 'stream' attribute for the same purpose. The client MAY omit the 'stream' attribute if it wants the connection manager to broadcast the payloads over all open streams. Note: A &lt;body/&gt; element MUST NOT contain different payloads for different streams.</p>
+      <p>If a stream name does not correspond to one of the session's open streams, then the receiving connection manager SHOULD return an 'item-not-found' terminal binding error, or the receiving client SHOULD terminate the session. However, if the receiving entity has only just closed the stream (and the sender might not have been aware of that when it sent the payloads), then it MAY instead simply silently ignore any payloads the &lt;body/&gt; element contains.</p>
+      <p>Note: Empty &lt;body/&gt; elements that do not include a 'from' attribute SHOULD NOT include a 'stream' attribute (since nothing is being transmitted for any stream). If such a &lt;body/&gt; element does include a 'stream' attribute then the receiving entity SHOULD ignore the attribute.</p>
+    <example caption="Client sends payload with a stream name">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 188
+
+<body rid='1249243562'
+      sid='SomeSID'
+      stream='secondStreamName'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <message to='contact@example.com'
+           xmlns='jabber:client'>
+    <body>I said hello.</body>
+  </message>
+</body>]]></example>
+      <p>Note: The value of the 'stream' attribute of the response MAY be different than the corresponding request. <note>Each HTTP response MUST belong to the same session as the request that triggered it, but not necessarily to the same stream.</note></p>
+    <example caption="Connection manager responds with a different stream name">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 185
+
+<body stream='firstStreamName'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <message from='contact@example.com'
+           to='user@example.com'
+           xmlns='jabber:client'>
+    <body>Hi yourself!</body>
+  </message>
+</body>]]></example>
+      <p>If no stream name is specified by the connection manager then the client MUST assume the payloads are associated with the first stream (even if the first stream has been closed).</p>
+      <p>If no stream name is specified by the client then the connection manager MUST broadcast the payloads over all open streams. <note>The broadcast payloads can be of any type.</note></p>
+    <example caption="Client asks for a payload to be broadcast">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 188
+
+<body rid='1249243562'
+      sid='SomeSID'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <presence xmlns='jabber:client'>
+    <show>away</show>
+  </presence>
+</body>]]></example>
+    </section2>
+    <section2 topic='Closing a Stream' anchor='multi-close'>
+      <p>If more than one stream is open within a session, the client MAY close one open stream at any time using the procedure described in the section <link url="#terminate">Terminating the BOSH Session</link> above, taking care to specify the stream name with a 'stream' attribute. If the client closes the last stream the connection manager MUST terminate the session. If the client does not specify a stream name then the connection manager MUST close all open streams (sending any payloads the terminate request contains to all streams), and terminate the session.</p>
+      <example caption="Client closes one stream">
+<![CDATA[POST /webclient HTTP/1.1
+Host: httpcm.example.com
+Accept-Encoding: gzip, deflate
+Content-Type: text/xml; charset=utf-8
+Content-Length: 153
+
+<body rid='1249243564'
+      sid='SomeSID'
+      stream='secondStreamName'
+      type='terminate'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <presence type='unavailable'
+            xmlns='jabber:client'/>
+</body>]]></example>
+    </section2>
+    <section2 topic='Error Conditions' anchor='multi-error'>
+      <p>If more than one stream is open within a session, the connection manager MAY include a 'stream' attribute in a fatal binding error (see <link url="#errorstatus-terminal">Terminal Binding Conditions</link>). If a 'stream' attribute is specified then the stream MUST be closed by both entities but the session SHOULD NOT be terminated.</p>
+      <example caption="Fatal stream error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='remote-connection-failed'
+      stream='secondStreamName'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>Note: If the connection manager does not include a 'stream' attribute in a fatal binding error then all the session's open streams MUST be closed by both entities and the session MUST be terminated.</p>
+    </section2>
+  </section1>
+
+  <section1 topic='Error and Status Codes' anchor='errorstatus'>
+    <p>There are four types of error and status reporting in HTTP responses:</p>
+    <table caption='Error Condition Types'>
+      <tr><th>Condition Type</th><th>Description</th></tr>
+      <tr><td><strong>HTTP Conditions</strong>&#32;<em>(Deprecated)</em></td><td>The connection manager responds to an invalid request from a <em>legacy</em> client with a standard HTTP error. These are used for binding syntax errors, possible attacks, etc. Note that constrained clients are unable to differentiate between HTTP errors.</td></tr>
+      <tr><td><strong>Terminal Binding Conditions</strong></td><td>These error conditions can be read by constrained clients. They are used for connection manager problems, abstracting stream errors, communication problems between the connection manager and the server, and invalid client requests (binding syntax errors, possible attacks, etc.)</td></tr>
+      <tr><td><strong>Recoverable Binding Conditions</strong></td><td>These report communication problems between the connection manager and the client. They do not terminate the session. Clients recover from these errors by resending all the preceding &lt;body/&gt; wrappers that have not received responses.</td></tr>
+      <tr><td><strong>Transported Protocol Conditions</strong></td><td>Errors relating to the XML payloads <em>within</em> &lt;body/&gt; wrappers are, in general, defined in the documentation of the protocol being transported. They do not terminate the session.</td></tr>
+    </table>
+    <p>Full descriptions are provided below.</p>
+    <section2 topic='HTTP Conditions' anchor='errorstatus-http'>
+      <p><em>Note: All HTTP codes except 200 have been superseded by Terminal Binding Conditions to allow clients to determine whether the source of errors is the connection manager application or an HTTP intermediary.</em></p>
+      <p>A legacy client (or connection manager) is a client (or connection manager) that did not include a 'ver' attribute in its session creation request (or response). A legacy client (or connection manager) will interpret (or respond with) HTTP error codes according to the table below. Non-legacy connection managers SHOULD NOT send HTTP error codes unless they are communicating with a legacy client. Upon receiving an HTTP error (400, 403, 404), a legacy client or any client that is communicating with a legacy connection manager MUST consider the HTTP session to be null and void. A non-legacy client that is communicating with a non-legacy connection manager MAY consider that the session is still active.</p>
+      <table caption='HTTP Error and Status Codes'>
+        <tr>
+          <th>Code</th>
+          <th>Name</th>
+          <th>Superseded&#160;by</th>
+          <th>Purpose</th>
+        </tr>
+        <tr>
+          <td>200</td>
+          <td>OK</td>
+          <td>-</td>
+          <td>Response to valid client request.</td>
+        </tr>
+        <tr>
+          <td>400</td>
+          <td>Bad Request</td>
+          <td>bad-request</td>
+          <td>Inform client that the format of an HTTP header or binding element is unacceptable (e.g., syntax error).</td>
+        </tr>
+        <tr>
+          <td>403</td>
+          <td>Forbidden</td>
+          <td>policy-violation</td>
+          <td>Inform client that it has broken the session rules (polling too frequently, requesting too frequently, too many simultaneous requests).</td>
+        </tr>
+        <tr>
+          <td>404</td>
+          <td>Not Found</td>
+          <td>item-not-found</td>
+          <td>Inform client that (1) 'sid' is not valid, (2) 'stream' is not valid, (3) 'rid' is larger than the upper limit of the expected window, (4) connection manager is unable to resend response, (5) 'key' sequence is invalid.</td>
+        </tr>
+      </table>
+      <p>Note: No other HTTP error and status codes were defined in the early versions of BOSH (e.g., Internal Server Error).</p>
+    </section2>
+    <section2 topic='Terminal Binding Conditions' anchor='errorstatus-terminal'>
+      <p>In any response it sends to the client, the connection manager MAY return a fatal error by setting a 'type' attribute of the &lt;body/&gt; element to "terminate". These binding errors imply that the HTTP session is terminated (unless a 'stream' attribute is specified -- see <link url="#multi-error">Multiple Stream Error Conditions</link>).</p>
+      <p>Note: Although many of these conditions are similar to the XMPP stream error conditions specified in <cite>RFC 6120</cite>, they are not to be confused with XMPP stream errors. In cases where BOSH is being used to transport XMPP, any fatal XMPP stream error conditions experienced between the connection manager and the XMPP server SHOULD only be reported using the "remote-stream-error" condition as described below.</p>
+      <example caption="Remote connection failed error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='terminate'
+      condition='remote-connection-failed'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+      <p>The following values of the 'condition' attribute are defined:</p>
+      <table caption='Terminal Binding Error Conditions'>
+        <tr>
+          <th>Condition</th>
+          <th>Purpose</th>
+        </tr>
+        <tr>
+          <td>bad-request*</td>
+          <td>The format of an HTTP header or binding element received from the client is unacceptable (e.g., syntax error).</td>
+        </tr>
+        <tr>
+          <td>host-gone</td>
+          <td>The target domain specified in the 'to' attribute or the target host or port specified in the 'route' attribute is no longer serviced by the connection manager.</td>
+        </tr>
+        <tr>
+          <td>host-unknown</td>
+          <td>The target domain specified in the 'to' attribute or the target host or port specified in the 'route' attribute is unknown to the connection manager.</td>
+        </tr>
+        <tr>
+          <td>improper-addressing</td>
+          <td>The initialization element lacks a 'to' or 'route' attribute (or the attribute has no value) but the connection manager requires one.</td>
+        </tr>
+        <tr>
+          <td>internal-server-error</td>
+          <td>The connection manager has experienced an internal error that prevents it from servicing the request.</td>
+        </tr>
+        <tr>
+          <td>item-not-found*</td>
+          <td>(1) 'sid' is not valid, (2) 'stream' is not valid, (3) 'rid' is larger than the upper limit of the expected window, (4) connection manager is unable to resend response, (5) 'key' sequence is invalid.</td>
+        </tr>
+        <tr>
+          <td>other-request</td>
+          <td>Another request being processed at the same time as this request caused the session to terminate.</td>
+        </tr>
+        <tr>
+          <td>policy-violation*</td>
+          <td>The client has broken the session rules (polling too frequently, requesting too frequently, sending too many simultaneous requests).</td>
+        </tr>
+        <tr>
+          <td>remote-connection-failed</td>
+          <td>The connection manager was unable to connect to, or unable to connect securely to, or has lost its connection to, the server.</td>
+        </tr>
+        <tr>
+          <td>remote-stream-error</td>
+          <td>Encapsulates an error in the protocol being transported.</td>
+        </tr>
+        <tr>
+          <td>see-other-uri</td>
+          <td>The connection manager does not operate at this URI (e.g., the connection manager accepts only SSL or TLS connections at some https: URI rather than the http: URI requested by the client). The client can try POSTing to the URI in the content of the &lt;uri/&gt; child element.</td>
+        </tr>
+        <tr>
+          <td>system-shutdown</td>
+          <td>The connection manager is being shut down. All active HTTP sessions are being terminated. No new sessions can be created.</td>
+        </tr>
+        <tr>
+          <td>undefined-condition</td>
+          <td>The error is not one of those defined herein; the connection manager SHOULD include application-specific information in the content of the &lt;body/&gt; wrapper.</td>
+        </tr>
+      </table>
+      <p>* If the client did not include a 'ver' attribute in its session creation request then the connection manager SHOULD send a <em>deprecated</em>&#32;<link url="#errorstatus-http">HTTP Error Condition</link> instead of this terminal binding condition. If the connection manager did not include a 'ver' attribute in its session creation response then the client SHOULD expect it to send a <em>deprecated</em> HTTP Error Condition instead of this terminal binding condition.</p>
+      <p>The following is an example of a "see-other-uri" condition:</p>
+      <example caption="See other URI error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body condition='see-other-uri'
+      type='terminate'
+      xmlns='http://jabber.org/protocol/httpbind'>
+  <uri>https://secure.jabber.org/xmppcm</uri>
+</body>]]></example>
+      <p>The following is an example including a "remote-stream-error" condition:</p>
+      <example caption="Remote error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body condition='remote-stream-error'
+      type='terminate'
+      xmlns='http://jabber.org/protocol/httpbind'
+      xmlns:stream='http://etherx.jabber.org/streams'>
+  <message from='contact@example.com'
+           to='user@example.com'
+           xmlns='jabber:client'>
+    <body>I said "Hi!"</body>
+  </message>
+  <stream:error>
+    <xml-not-well-formed xmlns='urn:ietf:params:xml:ns:xmpp-streams'/>
+    <text xmlns='urn:ietf:params:xml:ns:xmpp-streams'
+          xml:lang='en'>
+      Some special application diagnostic information!
+    </text>
+    <escape-your-data xmlns='application-ns'/>
+  </stream:error>
+</body>]]></example>
+      <p>Naturally, the client MAY report binding errors to the connection manager as well, although this is unlikely.</p>
+    </section2>
+    <section2 topic='Recoverable Binding Conditions' anchor='errorstatus-recover'>
+      <p>In any response it sends to the client, the connection manager MAY return a recoverable error by setting a 'type' attribute of the &lt;body/&gt; element to "error". These errors do not imply that the HTTP session is terminated.</p>
+      <p>If it decides to recover from the error, then the client MUST repeat the HTTP request that resulted in the error, as well as all the preceding HTTP requests that have not received responses. The content of these requests MUST be identical to the &BODY; elements of the original requests. This enables the connection manager to recover a session after the previous request was lost due to a communication failure.</p>
+      <example caption="Recoverable error">
+<![CDATA[HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+Content-Length: 68
+
+<body type='error'
+      xmlns='http://jabber.org/protocol/httpbind'/>]]></example>
+    </section2>
+    <section2 topic='XML Payload Conditions' anchor='errorstatus-stanza'>
+      <p>Application-level error conditions described in the documentation of the protocol being transported are routed to the client through the connection manager. They are transparent to the connection manager, and therefore out of scope for the transport binding defined herein.</p>
+    </section2>
+  </section1>
+  <section1 topic='Implementation Notes' anchor='impl'>
+    <section2 topic='HTTP Pipelining' anchor='impl-pipelining'>
+      <p>Even if the client requests HTTP Pipelining and the connection manager supports it, there is no guarantee that pipelining will succeed, because it might not be supported by intermediate proxies.</p>
+      <p>The client SHOULD set the 'hold' attribute to a value of "1". If HTTP Pipelining does not work (because the server returns HTTP 1.0 or connection:close), then the client SHOULD degrade gracefully by using multiple connections.</p>
+    </section2>
+  </section1>
+  <section1 topic='Security Considerations' anchor='security'>
+    <section2 topic='Connection Between Client and BOSH Service' anchor='security-client'>
+      <p>All communications between a client and a BOSH service SHOULD occur over encrypted HTTP connections. Negotiation of encryption between the client and the connection manager SHOULD occur at the transport layer or the HTTP layer, not the application layer; such negotiation SHOULD follow the HTTP/SSL protocol defined in &ssl;, although MAY follow the HTTP/TLS protocol defined in &rfc2818; or the TLS Within HTTP protocol defined in &rfc2817;.</p>
+      <p>If the HTTP connection used to send the initial session request is encrypted, then all the other HTTP connections used within the session MUST also be encrypted. Furthermore, if authentication certificates are exchanged when establishing the encrypted connection that is used to send the initial session request, then the client and/or connection manager SHOULD ensure that the same authentication certificates are employed for all subsequent connections used by the session. Once such a "secure session" has been established:</p>
+      <ul>
+        <li>If the connection manager refuses to establish an encrypted connection or offers a different certificate, then the client SHOULD close the connection and terminate the session without sending any more requests.</li>
+        <li>If the client sends a wrapper element that is part of a "secure session" over a connection that either is not encrypted or uses a different certificate, then the connection manager SHOULD simply close the connection. The connection manager SHOULD NOT terminate the session since that would facilitate denial of service attacks.</li>
+      </ul>
+    </section2>
+    <section2 topic='Connection Between BOSH Service and Application' anchor='security-app'>
+      <p>A BOSH service SHOULD encrypt its connection to the backend application using appropriate technologies such as Secure Sockets Layer (SSL), Transport Layer Security (TLS), and StartTLS if supported by the backend application. Alternatively, the BOSH service can be considered secure (1) if it is running on the same physical machine as the backend application or (2) if it running on the same private network as the backend application and the administrators are sure that unknown individuals or processes do not have access to that private network.</p>
+      <p>If data privacy is desired, the client SHOULD encrypt its messages using an application-specific end-to-end encryption technology, because there is no way for the client to be sure that the BOSH service encrypts its connection to the application; methods for doing so are outside the scope of this specification.</p>
+    </section2>
+    <section2 topic='Unpredictable SID and RID' anchor='security-sidrid'>
+      <p>The session identifier (SID) and initial request identifier (RID) are security-critical and therefore MUST be both unpredictable and nonrepeating (see &rfc1750; for recommendations regarding randomness of SIDs and initial RIDs for security purposes).</p>
+    </section2>
+    <section2 topic='Use of SHA-1' anchor='security-sha'>
+      <p>Recent research has shown that in select cases it is possible to compromise the hashes produced by the SHA-1 hashing algorithm (see &rfc4270;). However, the use to which SHA-1 is put in BOSH will likely minimize the applicability of the attacks described in the literature. Furthermore, current estimates suggest that even with the recently-discovered attack, it would still take one year of computing by a government-sized entity to produce a collision.</p>
+    </section2>
+  </section1>
+  <section1 topic='IANA Considerations' anchor='iana'>
+    <p>TCP port 5280, conventially used for communication between BOSH clients and BOSH connection mangers, is registered with &IANA; in its port registry at &ianaports;, with a keyword of "xmpp-bosh". (Although use of this port is OPTIONAL, it is helpful to define this port in a standardized way so that BOSH clients can contact any given XMPP service via BOSH without the need either for DNS TXT records as described in &xep0156; or for more advanced methods such as U-NAPTR.</p>
+  </section1>
+  <section1 topic='XMPP Registrar Considerations' anchor='registrar'>
+    <section2 topic='Protocol Namespaces' anchor='registrar-ns'>
+      <p>The XMPP Registrar includes 'http://jabber.org/protocol/httpbind' in its registry of protocol namespaces.</p>
+    </section2>
+  </section1>
+  <section1 topic='XML Schema' anchor='schema'>
+    <code><![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+
+<xs:schema
+    xmlns:xs='http://www.w3.org/2001/XMLSchema'
+    xmlns:stream='http://etherx.jabber.org/streams'
+    targetNamespace='http://jabber.org/protocol/httpbind'
+    xmlns='http://jabber.org/protocol/httpbind'
+    elementFormDefault='qualified'>
+
+  <xs:annotation>
+    <xs:documentation>
+      The protocol documented by this schema is defined in
+      XEP-0124: http://www.xmpp.org/extensions/xep-0124.html
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:import namespace='http://www.w3.org/XML/1998/namespace'
+             schemaLocation='http://www.w3.org/2001/03/xml.xsd'/>
+
+  <xs:element name='body'>
+    <xs:complexType>
+      <xs:choice>
+        <xs:element name='uri'
+                minOccurs='0'
+                maxOccurs='1'
+                type='xs:string'/>
+        <xs:any namespace='##other'
+                minOccurs='0'
+                maxOccurs='unbounded'
+                processContents='lax'/>
+      </xs:choice>
+      <xs:attribute name='accept' type='xs:string' use='optional'/>
+      <xs:attribute name='ack' type='xs:positiveInteger' use='optional'/>
+      <xs:attribute name='authid' type='xs:string' use='optional'/>
+      <xs:attribute name='charsets' type='xs:NMTOKENS' use='optional'/>
+      <xs:attribute name='condition' use='optional'>
+        <xs:simpleType>
+          <xs:restriction base='xs:NCName'>
+            <xs:enumeration value='bad-request'/>
+            <xs:enumeration value='host-gone'/>
+            <xs:enumeration value='host-unknown'/>
+            <xs:enumeration value='improper-addressing'/>
+            <xs:enumeration value='internal-server-error'/>
+            <xs:enumeration value='item-not-found'/>
+            <xs:enumeration value='other-request'/>
+            <xs:enumeration value='policy-violation'/>
+            <xs:enumeration value='remote-connection-failed'/>
+            <xs:enumeration value='remote-stream-error'/>
+            <xs:enumeration value='see-other-uri'/>
+            <xs:enumeration value='system-shutdown'/>
+            <xs:enumeration value='undefined-condition'/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name='content' type='xs:string' use='optional'/>
+      <xs:attribute name='from' type='xs:string' use='optional'/>
+      <xs:attribute name='hold' type='xs:unsignedByte' use='optional'/>
+      <xs:attribute name='inactivity' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute name='key' type='xs:string' use='optional'/>
+      <xs:attribute name='maxpause' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute name='newkey' type='xs:string' use='optional'/>
+      <xs:attribute name='pause' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute name='polling' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute name='report' type='xs:positiveInteger' use='optional'/>
+      <xs:attribute name='requests' type='xs:unsignedByte' use='optional'/>
+      <xs:attribute name='rid' type='xs:positiveInteger' use='optional'/>
+      <xs:attribute name='route' type='xs:string' use='optional'/>
+      <xs:attribute name='sid' type='xs:string' use='optional'/>
+      <xs:attribute name='stream' type='xs:string' use='optional'/>
+      <xs:attribute name='time' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute name='to' type='xs:string' use='optional'/>
+      <xs:attribute name='type' use='optional'>
+        <xs:simpleType>
+          <xs:restriction base='xs:NCName'>
+            <xs:enumeration value='error'/>
+            <xs:enumeration value='terminate'/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name='ver' type='xs:string' use='optional'/>
+      <xs:attribute name='wait' type='xs:unsignedShort' use='optional'/>
+      <xs:attribute ref='xml:lang' use='optional'/>
+      <xs:anyAttribute namespace='##other' processContents='lax'/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+    ]]></code>
+  </section1>
+<section1 topic='Acknowledgements' anchor='acks'>
+  <p>Thanks to Mike Cumings, Tomas Karasek, Tobias Markmann, Chris Seymour, Safa Sofuo&#287;lu, Stefan Strigler, Matthew Wild, Kevin Winters, and Christopher Zorn for their feedback.</p>
+</section1>
+</xep>
