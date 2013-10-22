@@ -1,0 +1,156 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE xep SYSTEM 'xep.dtd' [
+  <!ENTITY % ents SYSTEM 'xep.ent'>
+%ents;
+]>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+<header>
+  <title>Push Notifications</title>
+  <abstract>This specification defines a way for an XMPP servers to broadcast information for use in push notifications for mobile and other devices.</abstract>
+  &LEGALNOTICE;
+  <number>xxxx</number>
+  <status>ProtoXEP</status>
+  <type>Standards Track</type>
+  <sig>Standards</sig>
+  <dependencies>
+    <spec>XMPP Core</spec>
+    <spec>XMPP IM</spec>
+    <spec>XEP-0030</spec>
+  </dependencies>
+  <supersedes />
+  <supersededby/>
+  <shortname>NOT_YET_ASSIGNED</shortname>
+  <author>
+    <firstname>Lance</firstname>
+    <surname>Stout</surname>
+    <email>lance@lance.im</email>
+    <jid>lance@lance.im</jid>
+  </author>
+  <revision>
+    <version>0.0.1</version>
+    <date>2013-10-22</date>
+    <initials>lance</initials>
+    <remark><p>Initial version.</p></remark>
+  </revision>
+</header>
+<section1 topic='Introduction' anchor='intro'>
+  <p>TBD. Define distinguishing terms for the sending XMPP server push service and the receiving client application push service.</p>
+  <p>Potential alternatives: A well defined pubsub-on-a-jid node that requires approval, and just use pubsub features for this.</p>
+</section1>
+<section1 topic='Discovering support' anchor='disco'>
+  <p>If a server supports push notifications, it MUST specify the 'urn:xmpp:push:0' feature in its service discovery information features as specified in &xep0030; and the Entity Capabilities profile specified in &xep0115;.</p>
+  <example caption='Client checks for support by the server'><![CDATA[
+<iq type="get"
+    to="capulet.example"
+    from="juliet@capulet.example/balcony"
+    id="info1">
+  <query xmlns="http://jabber.org/protocol/disco#info"/>
+</iq>]]></example>
+  <example caption='Server advertises support for push notifications'><![CDATA[
+<iq type="result"
+    to="juliet@capulet.example/balcony"
+    from="capulet.example"
+    id="info1">
+  <query xmlns="http://jabber.org/protocol/disco#info">
+    ...
+    <feature var="urn:xmpp:push:0"/>
+    ...
+  </query>
+</iq>]]></example>
+  <p>The push notification service MAY be supported through the use of an external component (&xep0114;); in which case, the component MUST return an identity of "component/push" in addition to the "urn:xmpp:push:0" feature.</p>
+  <example caption='Server component advertises support for push notifications'><![CDATA[
+<iq type="result"
+    to="juliet@capulet.lit/balcony"
+    from="push.capulet.lit"
+    id="info2">
+  <query xmlns="http://jabber.org/protocol/disco#info">
+    <identity category="component" type="push" />
+    ...
+    <feature var="urn:xmpp:push:0" />
+  </query>
+</iq>]]></example>
+</section1>
+<section1 topic='Use Cases' anchor='usecases'>
+  <section2 topic="Registering a Push Notification Service">
+    <example caption='Client registers an endpoint for receiving push notifications.'><![CDATA[
+<iq type="set"
+    to="juliet@capulet.example"
+    id="push0">
+  <register xmlns="urn:xmpp:push:0">push.mobileclient.example</register>
+</iq>]]></example>
+  </section2>
+  <section2 topic="Unregistering a Push Notification Service">
+    <example caption='Client removes an endpoint for receiving push notifications.'><![CDATA[
+<iq type="set"
+    to="juliet@capulet.example"
+    id="push1">
+  <unregister xmlns="urn:xmpp:push:0">push.mobileclient.example</unregister>
+</iq>]]></example>
+  </section2>
+  <section2 topic="Listing registered push notification endpoints">
+    <example caption='Client requests existing notification endpoints.'><![CDATA[
+<iq type="get"
+    to="juliet@capulet.example"
+    id="push2">
+  <query xmlns="http://jabber.org/protocol/disco#items" node="urn:xmpp:push:0" />
+</iq>]]></example>
+    <example caption='Client receives existing notification endpoints.'><![CDATA[
+<iq type="result"
+    to="juliet@capulet.example"
+    id="push2">
+  <query xmlns="http://jabber.org/protocol/disco#items" node="urn:xmpp:push:0">
+    <item jid="push.mobileclient.example" />
+    <item jid="push.otherclient.example" />
+  </query>
+</iq>]]></example>
+  </section2>
+  <section2 topic="Receiving a Push Notification">
+    <example caption='The push notification service receives a notification.'><![CDATA[
+<message type="headline" to="push.mobileclient.example" from="juliet@capulet.example">
+  <tbd xmlns="urn:xmpp:push:0">
+    ... forwarding or somesuch payload
+  </tbd>
+</message>]]></example>
+  </section2>
+</section1>
+<section1 topic="Implementation Notes" anchor='impl'>
+  <p>TBD</p>
+</section1>
+<section1 topic='Security Considerations' anchor='security'>
+  <p>TBD</p>
+</section1>
+<section1 topic='IANA Considerations' anchor='iana'>
+  <p>This document requires no interaction with &IANA;.</p>
+</section1>
+<section1 topic='XMPP Registrar Considerations' anchor='registrar'>
+  <section2 topic='Protocol Namespaces' anchor='ns'>
+    <p>The &REGISTRAR; includes 'urn:xmpp:push:0' in its registry of protocol namespaces (see &NAMESPACES;).</p>
+    <ul>
+      <li>urn:xmpp:push:0</li>
+    </ul>
+  </section2>
+  <section2 topic='Protocol Versioning' anchor='registrar-versioning'>
+    &NSVER;
+  </section2>
+  <section2 topic='Service Discovery Category/Type' anchor='registrar-disco'>
+    <p>The &REGISTRAR; includes a category of "component" in its registry of Service Discovery identities (see &DISCOCATEGORIES;); as a result of this document, the Registrar includes a type of "push" to that category.</p>
+    <p>The registry submission is as follows:</p>
+    <code><![CDATA[
+    <category>
+      <name>component</name>
+      <type>
+        <name>push</name>
+        <desc>
+          A server component that offers push notification broadcasting.
+        </desc>
+        <doc>XEP-XXXX</doc>
+      </type>
+    </category>
+]]></code>
+  </section2>
+</section1>
+<section1 topic='XML Schema' anchor='schema'>
+  <code>TBD</code>
+</section1>
+</xep>
