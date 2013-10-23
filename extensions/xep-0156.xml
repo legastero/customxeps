@@ -139,7 +139,7 @@ _xmppconnect IN TXT "_xmpp-client-wap=http://wap.jabber.org/connector"
   </section2>
   <section2 topic='Examples' anchor='httpexamples'>
     <p>The following examples show two host-meta link records: the first indicates support for the XMPP Over BOSH connection method defined in <cite>XEP-0124</cite> and <cite>XEP-0206</cite> and the second indicates support for the &xmppoverwebsocket; connection method.</p>
-    <example caption='Result for /.well-known/host-meta'><![CDATA[<?xml version='1.0' encoding=utf-9'?>
+    <example caption='Result for /.well-known/host-meta'><![CDATA[<?xml version='1.0' encoding=utf-8'?>
 <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
   ...
   <Link rel="urn:xmpp:alt-connections:xbosh"
