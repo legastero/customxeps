@@ -142,9 +142,9 @@ _xmppconnect IN TXT "_xmpp-client-wap=http://wap.jabber.org/connector"
     <example caption='Result for /.well-known/host-meta'><![CDATA[<?xml version='1.0' encoding=utf-9'?>
 <XRD xmlns='http://docs.oasis-open.org/ns/xri/xrd-1.0'>
   ...
-  <Link rel="urn:xmpp:altconnect:bosh"
+  <Link rel="urn:xmpp:alt-connections:xbosh"
         href="https://example.com:5280/bosh" />
-  <Link rel="urn:xmpp:altconnect:websocket"
+  <Link rel="urn:xmpp:alt-connections:websocket"
         href="wss://example.com:5280/websocket" />
   ...
 </XRD>
@@ -155,11 +155,11 @@ _xmppconnect IN TXT "_xmpp-client-wap=http://wap.jabber.org/connector"
   "links": [
     ...
     {
-      "rel": "urn:xmpp:altconnect:bosh",
+      "rel": "urn:xmpp:alt-connections:xbosh",
       "href": "https://example.com:5280/bosh"
     },
     {
-      "rel": "urn:xmpp:altconnect:websocket",
+      "rel": "urn:xmpp:alt-connections:websocket",
       "href": "wss://example.com:5280/websocket"
     },
     ...
