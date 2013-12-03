@@ -72,12 +72,16 @@
 </iq>]]></example>
 </section1>
 <section1 topic='Use Cases' anchor='usecases'>
-  <section2 topic="Registering a Push Notification Service">
+  <section2 topic="Requesting Push Notification Service">
+    <p>MUST include a JID for receiving the notifications</p>
+    <p>MAY specify an opaque id attribute that the receiving service MAY use to target that specific device when using stream management</p>
+    <p>MAY specify an offline attribute with the value "all" or "client" (the default). When set to "all", the recipient will not be sent notifications unless the user has no online connections. When set to "client", the recipient will receive a notification only when there are no online connections that have specified the same recipient.</p>
+    <p>If the client instance disconnects while using stream management, the recipient MAY be sent a notification including the provided id to target that specific device.</p>
     <example caption='Client registers an endpoint for receiving push notifications.'><![CDATA[
 <iq type="set"
     to="juliet@capulet.example"
     id="push0">
-  <register xmlns="urn:xmpp:push:0">push.mobileclient.example</register>
+  <register xmlns="urn:xmpp:push:0" offline="client" id="2423423f">push.mobileclient.example</register>
 </iq>]]></example>
   </section2>
   <section2 topic="Unregistering a Push Notification Service">
