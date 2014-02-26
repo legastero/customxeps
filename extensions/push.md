@@ -160,11 +160,11 @@ There are three cases which control where notifications are delivered:
 2. A user is online, but has no active sessions using the client app.
 3. A user has active sessions using the client app, but one or more of those sessions are using XEP-0198 stream management and have lost connection but the timeout period for the sessions have not expired.
 
-In the first case, the notification SHOULD be delivered to all registered services, and likewise when in the second case, the notification SHOULD be delivered to only those services which have no active user sessions.
+In the first case, the notification SHOULD be delivered to all registered services. For the second case, the notification SHOULD be delivered to only those services which have no active user sessions.
 
 For the third case, the notification will be delivered to the services associated with the sessions pending stream management timeout; however, if those sessions provided a "sid" value when enabling push notifications, then that value MUST be included in a "sid" attribute on the `<push />` element.
 
-In any case, before delivering a notification, the server MUST verify that the target JID supports the service discover feature "urn:xmpp:push:target" in order to mitigate potential spam issues.
+In any case, before delivering a notification, the server MUST verify that the target JID supports the service discovery feature "urn:xmpp:push:target" in order to mitigate potential spam issues.
 
 ## Security Considerations
 
