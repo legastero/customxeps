@@ -66,7 +66,7 @@ The initial step in enabling push notifications is for the client instance to re
 
 The backend service MAY then return a result form that contains a field named "service" which contains the JID where the user's server will send push notifications.
 
-As it is possible that the device ID token to change, the registration step MAY be done for each XMPP session.
+As it is possible for the device ID token to change, the registration step MAY be done for each XMPP session.
 
 ## Enabling Notifications
 
@@ -79,10 +79,11 @@ Once a client app instance has registered with its backend service, it can then 
 
 ## Configuring Notifications
 
-The client implementation SHOULD be able to define the type and amount of data that is sent to the client backend service by the XMPP server. A privacy-aware client CAN expose this configuration to users, or provide default values that best suit the client backend service implementation. The configuration is performed using [XEP-0004: Data Forms](http://xmpp.org/extensions/xep-0004.html).
+The client implementation SHOULD be able to define the type and amount of data that is sent to the client backend service by the XMPP server. A privacy-aware client CAN expose this configuration to users, or provide default values that best suit a specific client backend service implementation. The configuration is performed using [XEP-0004: Data Forms](http://xmpp.org/extensions/xep-0004.html).
 
+### Editing the Default Configuration for All Services
     <iq type="get">
-      <configure xmlns="urn:xmpp:push:0" service=""/>
+      <configure xmlns="urn:xmpp:push:0" />
     </iq>
     <iq type="result">
       <configure xmlns="urn:xmpp:push:0">
@@ -114,6 +115,51 @@ The client implementation SHOULD be able to define the type and amount of data t
     </iq>
 
     <iq type="set">
+      <configure xmlns="urn:xmpp:push:0">
+        <x xmlns="urn:xmpp:push:0">
+          ...
+        </x>
+      </configure>
+    </iq>
+    <iq type="result" />
+
+### Editing the Configuration for a Particular Service
+
+    <iq type="get">
+      <configure xmlns="urn:xmpp:push:0" service="push-23.client.example"/>
+    </iq>
+    <iq type="result">
+      <configure xmlns="urn:xmpp:push:0">
+        <x xmlns="jabber:x:data" type="form">
+          <field type="hidden" var="FORM_TYPE">
+            <value>urn:xmpp:push:0</value>
+          </field>
+          <field type="boolean" var="include-bodies">
+            <value>1</value>
+          </field>
+          <field type="boolean" var="include-senders">
+            <value>1</value>
+          </field>
+          <field type="boolean" var="message-count">
+            <value>1</value>
+          </field>
+          <field type="boolean" var="pending-subscription-count">
+            <value>1</value>
+          </field>
+          <field type="boolean" var="jingle-media">
+            <value>1</value>
+          </field>
+          <field type="boolean" var="jingle-filetransfer">
+            <value>1</value>
+          </field>
+          ...
+        </x>
+      </configure>
+    </iq>
+
+When saving configuration changes for a specific push service, only the changed fields SHOULD be submitted, so that the server MAY appropriately propagate the settings from the default configuration for the the fields that were not set.
+
+    <iq type="set">
       <configure xmlns="urn:xmpp:push:0" service="push-023.client.example">
         <x xmlns="urn:xmpp:push:0">
           ...
@@ -121,6 +167,7 @@ The client implementation SHOULD be able to define the type and amount of data t
       </configure>
     </iq>
     <iq type="result" />
+
 
 ## Disabling Notifications
 
