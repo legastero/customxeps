@@ -38,7 +38,7 @@
     </header>
     <section1 topic='Introduction' anchor='intro'>
         <p>The purpose of push notifications is to inform users of new messages or other pertinent information even when they have no XMPP clients online.</p>
-        <p>Typically, these notifications are delivered to a user's mobile device, displaying a notice that can trigger opening an XMPP client to continue a conversation or answer a Jingle video request.</p>
+        <p>Typically, these notifications are delivered to a user's mobile device, displaying a notice that can trigger opening an XMPP client to continue a conversation or answer a Jingle session request.</p>
 
         <p>There have been several push noticiations implementations by mobile XMPP client vendors. However, experience has shown that these implementations carried several drawbacks:</p>
         <ul>
@@ -56,14 +56,15 @@
         <p class='em'>Note: Any publish-subscribe use cases not described herein are described in <cite>XEP-0060</cite>. Also, this document does not show error flows related to the generic publish-subscribe use cases referenced herein, since they are exhaustively defined in <cite>XEP-0060</cite>. The reader is referred to <cite>XEP-0060</cite> for all relevant protocol details related to the XMPP publish-subscribe extension. This document merely defines a "subset" or "profile" of XMPP publish-subscribe.</p>
     </section1>
 
-    <section1 topic='How it works' anchor='how-it-works'>
-        <p>XMPP Push works by using two push notification services in tandem:</p>
+    <section1 topic='Concepts and Approach' anchor='concepts'>
+        <p>XMPP Push works between the user's XMPP server and two push notification services in tandem:</p>
         <ol>
-            <li>An XMPP-based push service (as defined here), allowing an XMPP server to deliver a notification to the backend services for a user's client application.</li>
-            <li>A third-party (and potentially proprietary) push service which delivers the notification from the client's backend service to the user's device.</li>
+            <li>The user's XMPP server publishes notifications to the XMPP Push Service of each of the user's client applications.</li>
+            <li>The XMPP Push Service (as defined here) for a client application then delivers the notification to a third-party notification delivery service.</li>
+            <li>The third-party (and potentially proprietary or platform-dependent) push service delivers the notification from the client application's backend service to the user's device.</li>
         </ol>
 
-        <p>This dual approach allows the user's XMPP server to deliver notifications to arbitrary third-pary clients, and in turn allows those clients to use the appropriate delivery mechanism for their platforms without having to share any private keys or other credentials with the XMPP server.</p>
+        <p>This two-tiered push architecture allows the user's XMPP server to deliver notifications to arbitrary third-pary clients, and in turn allows those clients to use the appropriate delivery mechanism for their platforms without having to share any private keys or other credentials with the XMPP server.</p>
 
         <section2 topic='General Architecture of a Push Notification Service' anchor='general-architecture'>
             <p>The current state-of-the-art for a generic push notification service requires four actors:</p>
@@ -99,7 +100,7 @@
         </section2>
 
         <section2 topic='Mapping the General Architecture to XMPP' anchor='xmpp-architecture'>
-            <p>To build a XMPP Push Notification service on top of a general one, we perform the following mapping:</p>
+            <p>To build an XMPP Push service on top of a general push service, we perform the following mapping:</p>
             <ul>
                 <li>The general App Client becomes the XMPP User Agent</li>
                 <li>The general App Server becomes the XMPP Push Server</li>
@@ -109,21 +110,52 @@
         </section2>
     </section1>
 
+    <section1 topic='XMPP Push Service'>
+        <p>An XMPP Push Service is a PubSub service as defined by the XMPP &xep0060; extension. The functional difference between a Push Service and a generic pubsub service is that a Push Service will generally summarize and re-broadcast published content via non-XMPP mechanisms.</p>
+        <p class='em'>Note: a Push Service is provided by a specific client application. A user's XMPP server will typically <em>not</em> act as a Push Service itself, but will instead publish to the Push Services for the user's client applications.</p>
+
+        <section2 topic='Recommended Defaults'>
+            <p>A Push Service MUST:</p>
+            <ul>
+                <li>Support the "whitelist" access model and set it to the default.</li>
+                <li>Support the "publish-only" affiliation.</li>
+            </ul>
+        </section2>
+        <section2 topic='Business Rules'>
+            <p>Each PubSub node is a delivery target for the Push Service, which could represent multiple devices for a single user.</p>
+            <p>In order to prevent information leaks, each node SHOULD be configured with a "whitelist" access model so that only trusted entities are able to view or subscribe to published notifications. Furthermore, the "publish-only" affiliation SHOULD be used to allow acceptable entities (such as the user's bare JID) to publish to the node to trigger notifications.</p>
+            <p>Care ought to be taken to ensure that publish requests are coming from the user's server and not from other third-party client applications using the full JID of a user. A Push Service MAY opt to only accept or further process publish requests from bare JIDs to ensure that only a user's server is able to publish, but it SHOULD instead use publish options with credentials shared only with the user's server (see <link url='#publish-options'>Enabling Notifications</link>).</p>
+        </section2>
+    </section1>
+
     <section1 topic='Enabling Notifications' anchor='enabling'>
+        <p>It is assumed that an App Client is capable of performing any registration procedures necessary for it to enable (device level) push notifications via its preferred push service and its own App Server.</p>
+
         <example caption='User Publishes Time Zone Offset'><![CDATA[
 <iq type="set" id="x42">
   <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo" />
 </iq>
 ]]></example>
+
+        <example caption='Enabling Notifications, with provided publish options'><![CDATA[
+<iq type="set" id="x42">
+  <enable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo">
+    <x xmlns="jabber:x:data">
+      <field var="FORM_TYPE"><value>http://jabber.org/protocol/pubsub#publish-options</value></field>
+      <field var="secret"><value>eruio234vzxc2kla-91<value></field>
+    </x>
+  </enable>
+</iq>
+]]></example>
     </section1>
 
     <section1 topic='Disabling Notifications' anchor='disabling'>
-        <example caption='User Publishes Time Zone Offset'><![CDATA[
+        <example caption='Disabling notifications'><![CDATA[
 <iq type="set" id="x97">
   <disable xmlns="urn:xmpp:push:0" jid="push-5.client.example" node="yxs32uqsflafdk3iuqo" />
 </iq>
 ]]></example>
-        <example caption='User Publishes Time Zone Offset'><![CDATA[
+        <example caption='Disabling all notifications to a given service'><![CDATA[
 <iq type="set" id="x97">
   <disable xmlns="urn:xmpp:push:0" jid="push-5.client.example" />
 </iq>
@@ -134,7 +166,7 @@
         <p>When the user's server detects an event warranting a push notification, it performs a PubSub publish to all registered push services, where the item payload is a &lt;notification /&gt; element in the "urn:xmpp:push:0" namespace.</p>
         <p>A data form whose FORM_TYPE is "urn:xmpp:push:summary" MAY be included to provide summarized information such as the number of unread messages or number of pending subscription requests.</p>
         <p>Other elements MAY be included if relevant for the notification.</p>
-        <example caption='User Publishes Time Zone Offset'><![CDATA[
+        <example caption='Server performs a push publish'><![CDATA[
 <iq type="set"
     from="user@example.com"
     to="push-5.client.example"
@@ -156,6 +188,37 @@
   </pubsub>
 </iq>
 ]]></example>
+
+        <example caption='Server includes provided publish options in a push publish'><![CDATA[
+<iq type="set"
+    from="user@example.com"
+    to="push-5.client.example"
+    id="n12">
+  <pubsub xmlns="http://jabber.org/protocol/pubsub">
+    <publish node="yxs32uqsflafdk3iuqo">
+      <item>
+        <notification xmlns="urn:xmpp:push:0">
+          <x xmlns="jabber:x:data">
+            <field var="FORM_TYPE"><value>urn:xmpp:push:summary</value></field>
+            <field var="message-count"><value>1</value></field>
+            <field var="last-message-sender"><value>juliet@capulet.example/balcony</value></field>
+            <field var="last-message-body"><value>Wherefore art thou, Romeo?</value></field>
+          </x>
+          <additional xmlns="http://example.com/custom">Additional custom elements</additional>
+        </notification>
+      </item>
+    </publish>
+    <publish-options>
+      <x xmlns="jabber:x:data">
+        <field var="FORM_TYPE"><value>http://jabber.org/protocol/pubsub#publish-options</value></field>
+        <field var="secret"><value>eruio234vzxc2kla-91<value></field>
+      </x>
+    </publish-options>
+  </pubsub>
+</iq>
+]]></example>
+
+
     </section1>
 
     <section1 topic='Security Considerations' anchor='security'>
