@@ -135,7 +135,7 @@
                 <li>The XMPP server is now the new logical "App Server"</li>
                 <li>The XMPP client portion of the application is the new logical "App Client"</li>
             </ul>
-            <example caption='???'><![CDATA[
+            <example caption='Mapping the generic push architecture to use XMPP'><![CDATA[
 +-------------+         +-------------+ 
 |             |   5     |             |
 | XMPP Client +---------> XMPP Server |
@@ -352,7 +352,14 @@
 </iq>
 ]]></example>
 
-        <example caption='The full path of a push notification, from XMPP server to user client'><![CDATA[
+        <section2 topic='Publish Errors'>
+            <p>If a publish request is returned with an IQ-error, then the server SHOULD consider the particular JID and node combination to be disabled.</p>
+            <p>However, a server MAY choose to keep a service enabled if the error is deemed recoverable or transient, until a sufficient number of errors have been received in a row.</p>
+        </section2>
+
+        <section2 topic='Notification Delivery'>
+            <p>Once the notification has been published to the XMPP Push Service, it is left to the implementation how to deliver the notification to the user's device. However, the general flow for the process looks like so:</p>
+            <example caption='The full path of a push notification, from XMPP server to user client'><![CDATA[
 +-------------+         +-------------+ 
 |             |         |             | 
 | XMPP Client |         | XMPP Server +--------+ 
@@ -373,10 +380,6 @@
 |            |          |               |
 +------------+          +---------------+
 ]]></example>
-
-        <section2 topic='Publish Errors'>
-            <p>If a publish request is returned with an IQ-error, then the server SHOULD consider the particular JID and node combination to be disabled.</p>
-            <p>However, a server MAY choose to keep a service enabled if the error is deemed recoverable or transient, until a sufficient number of errors have been received in a row.</p>
         </section2>
     </section1>
 
