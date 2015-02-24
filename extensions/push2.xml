@@ -26,12 +26,12 @@
         <author>
             <firstname>Lance</firstname>
             <surname>Stout</surname>
-            <email>lance@lance.im</email>
+            <email>lancestout@gmail.com</email>
             <jid>lance@lance.im</jid>
         </author>
         <revision>
             <version>0.0.1</version>
-            <date>2015-02-18</date>
+            <date>2015-02-23</date>
             <initials>lance</initials>
             <remark><p>Initial version.</p></remark>
         </revision>
@@ -95,8 +95,36 @@
                 <li>The User Agent gives the token to the App Client.</li>
                 <li>The App Client sends the token to the App Server for later use.</li>
             </ol>
-
+            <example caption='The five general steps to enable push notifications'><![CDATA[
++------------+          +------------+   
+|            |    5     |            |   
+| App Client +----------> App Server |   
+|            |          |            |   
++-+--------^-+          +------------+   
+  |1       |4                            
+  |        |                             
++-v--------+-+  3       +---------------+
+|            <----------+               |
+| User Agent |          | Push Service  |
+|            +---------->               |
++------------+  2       +---------------+
+]]></example>
             <p>To send a push notification, the App Server sends the notification data to the Push Server along with the saved token.</p>
+
+            <example caption='General delivery of a push notification'><![CDATA[
++------------+          +------------+   
+|            |          |            |   
+| App Client |          | App Server |   
+|            |          |            |   
++-----^------+          +------+-----+   
+      |                        |         
+      |                        |         
++-----+------+          +------v--------+
+|            |          |               |
+| User Agent <----------+ Push Service  |
+|            |          |               |
++------------+          +---------------+
+]]></example>
         </section2>
 
         <section2 topic='Mapping the General Architecture to XMPP' anchor='xmpp-architecture'>
@@ -107,6 +135,20 @@
                 <li>The XMPP server is now the new logical "App Server"</li>
                 <li>The XMPP client portion of the application is the new logical "App Client"</li>
             </ul>
+            <example caption='???'><![CDATA[
++-------------+         +-------------+ 
+|             |   5     |             |
+| XMPP Client +---------> XMPP Server |
+|             |         |             |
++-+--------^--+         +-------------+
+  |1       |4
+  |        | 
++-v--------+-+  3       +------------+-------------------+
+|            <----------+            |                   |
+| App Client |          | App Server | XMPP Push Service |
+|            +---------->            |                   |
++------------+  2       +------------+-------------------+
+]]></example>
         </section2>
     </section1>
 
@@ -183,6 +225,28 @@
             <li>The App Server informs the App Client of the provisioned node, along with any additional parameters required for publishing to that node.</li>
             <li>The App Client requests the XMPP server to publish notifications to the given node.</li>
         </ol>
+
+        <example caption='The full flow of enabling push notifications for an application'><![CDATA[
++-------------+         +-------------+                   
+|             |         |             |                   
+| XMPP Client +---------> XMPP Server |                   
+|             |  5b     |             |                   
++------^------+         +-------------+                   
+       |5a                                                
+       |                                                  
++------+-----+   4      +--------------+---------------------+
+|            <----------+              |                     |
+| App Client |          | App Server <-3-> XMPP Push Service |
+|            +---------->              |                     |
++--+------^--+   2      +--------------+---------------------+
+   |1a    |1d                                             
+   |      |                                               
++--v------+--+   1c     +---------------+                 
+|            <----------+               |                 
+| User Agent |          | Push Service  |                 
+|            +---------->               |                 
++------------+   1b     +---------------+                 
+]]></example>
 
         <p>For the last step, the App Client sends an IQ-set to the user's bare JID with an &lt;enable /&gt; element qualified by the 'urn:xmpp:push:0' namespace, which MUST contain a 'jid' attribute of the XMPP Push Service being enabled. It SHOULD contain a 'node' attribute which is set to the provisioned node specified by the App Server.</p>
 
@@ -286,6 +350,28 @@
     </publish-options>
   </pubsub>
 </iq>
+]]></example>
+
+        <example caption='The full path of a push notification, from XMPP server to user client'><![CDATA[
++-------------+         +-------------+ 
+|             |         |             | 
+| XMPP Client |         | XMPP Server +--------+ 
+|             |         |             |        | 
++-----^-------+         +-------------+        | 
+      .                                        | 
+      .                                        | 
++-----+------+          +------------+---------v---------+
+|            |          |            |                   |
+| App Client |          | App Server < XMPP Push Service |
+|            |          |            |                   |
++-----^------+          +------+-----+-------------------+
+      |                        | 
+      |                        | 
++-----+------+          +------v--------+
+|            |          |               |
+| User Agent <----------+ Push Service  |
+|            |          |               |
++------------+          +---------------+
 ]]></example>
 
         <section2 topic='Publish Errors'>
