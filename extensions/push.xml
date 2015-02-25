@@ -83,7 +83,7 @@
                 </di>
                 <di>
                     <dt>Push Service</dt>
-                    <dd>The push server is what ferries notifications from the App Server to the User Agent. How it does so is often proprietary and vendor/platform dependent.</dd>
+                    <dd>The push service is what ferries notifications from the App Server to the User Agent. How it does so is often proprietary and vendor/platform dependent.</dd>
                 </di>
             </dl>
 
