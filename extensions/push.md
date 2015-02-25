@@ -1,3 +1,7 @@
+# NOTE!
+
+You probably want to see <a href="push.html">the newer version instead.</a>
+
 # Push Notifications
 
 ## Introduction
