@@ -30,6 +30,12 @@
             <jid>lance@lance.im</jid>
         </author>
         <revision>
+            <version>0.0.2</version>
+            <date>2015-03-10</date>
+            <initials>lance</initials>
+            <remark><p>Adjust some wording and typo fixes.</p></remark>
+        </revision>
+        <revision>
             <version>0.0.1</version>
             <date>2015-02-23</date>
             <initials>lance</initials>
