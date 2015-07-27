@@ -392,11 +392,115 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Offering or Requesting Additional Files'>
-    <p>[Use 'content-add' and 'content-accept'/'content-reject'.]</p>
+    <p>While the Jingle File Transfer session is active, either party MAY choose to add additional files (both offers and requests) to the transfer session. To do so, a Jingle content-add action is used, as shown in the following examples.</p>
+    <example caption="Sender offers additional file"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='wsn361c9'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='content-add'
+          initiator='romeo@montague.lit/orchard'
+          sid='uj3b2'>
+    <content creator='initiator' name='additional' senders='initiator'>
+      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+        <file>
+          <name>second-file.txt</name>
+          <media-type>text/plain</media-type>
+          <size>6144</size>
+          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+        </file>
+      </description>
+      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
+                 mode='tcp'
+                 sid='vj3hs98y'>
+        <candidate cid='hft54dqy'
+                   host='192.168.4.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5086'
+                   priority='8257636'
+                   type='direct'/>
+        <candidate cid='hutr46fe'
+                   host='24.24.24.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5087'
+                   priority='8258636'
+                   type='direct'/>
+      </transport>
+    </content>
+  </jingle>
+</iq>]]></example>
+    <p>The other party then acks the content-add request.</p>
+    <example caption="Receiver acks content-add request"><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    to='romeo@montague.lit/orchard'
+    id='wsn361c9'
+    type='result' />]]></example>
+    <p>At this point, the content-add request needs to be either accepted or rejected using Jingle content-accept or content-reject actions.</p>
+  </section2>
+
+  <section2 topic='Ranged Transfers' anchor='range'>
+    <p>As in <cite>XEP-0096</cite>, a transfer can include only part of a file (e.g., to restart delivery of a truncated transfer session at a point other than the start of the file). This is done using the &lt;range/&gt; element. The usage is illustrated in the following examples.</p>
+    <p>Let us imagine that the parties negotiate a file transfer session using, say, In-Band Bytestreams. During the transfer, the recipient goes offline unexpectedly and IBB stanzas from the sender to the recipient begin to bounce. When the recipient comes back online, the sender could initiate a new Jingle session and specify that it wants to send all chunks after byte 270336 (which might be the 66th chunk of size 4096).</p>
+    <example caption="Sender requests session to send file, with range"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='wsn361c3'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='uj3b2'>
+    <content creator='initiator' name='restart' senders='initiator'>
+      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+        <file>
+          <range offset='270336'/>
+          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+        </file>
+      </description>
+      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
+             mode='tcp'
+                 sid='vj3hs98y'>
+        <candidate cid='hft54dqy'
+                   host='192.168.4.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5086'
+                   priority='8257636'
+                   type='direct'/>
+        <candidate cid='hutr46fe'
+                   host='24.24.24.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5087'
+                   priority='8258636'
+                   type='direct'/>
+      </transport>
+    </content>
+  </jingle>
+</iq>]]></example>
   </section2>
 
   <section2 topic='Aborting a Transfer'>
-    <p>[Use 'content-remove'.]</p>
+    <p>When there is only a single Jingle content, ending the session itself is sufficient to abort the transfer process.</p>
+    <p>At any point, either party MAY choose to abort the transfer of a file. To do so, a Jingle content-remove action is used, as shown in the following example.</p>
+    <example caption='Receiver aborts the transfer'><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    id='jp2ba614'
+    to='romeo@montague.lit/orchard'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='content-remove'
+          initiator='romeo@montague.lit/orchard'
+          sid='a73sjjvkla37jfea'>
+    <content creator='initiator' name='a-file-offer' />
+  </jingle>
+</iq>]]></example>
+    <p>The other pary then acks the content-remove request.</p>
+    <example caption='Sender acks abort request'><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='jp2ba614'
+    to='juliet@capulet.lit/balcony'
+    type='result' />]]></example>
+    <p>If after removing the content there are no other Jingle contents the session MUST be terminated as specified in <cite>XEP-0166</cite>.</p>
   </section2>
 
   <section2 topic='Ending the Session'>
@@ -484,7 +588,7 @@ Initiator                    Responder
         </file>
       </description>
       <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-        	     mode='tcp'
+                 mode='tcp'
                  sid='vj3hs98y'>
         <candidate cid='hft54dqy'
                    host='192.168.4.1'
@@ -674,7 +778,7 @@ Initiator                    Responder
         </file>
       </description>
       <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-        	     mode='tcp'
+                 mode='tcp'
                  sid='vj3hs98y'>
         <candidate cid='hft54dqy'
                    host='192.168.4.1'
@@ -723,7 +827,7 @@ Initiator                    Responder
         </file>
       </description>
       <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-        	     mode='tcp'
+                 mode='tcp'
                  sid='vj3hs98y'>
         <candidate cid='ht567dq'
                    host='192.169.1.10'
@@ -795,46 +899,6 @@ Initiator                    Responder
 </iq>]]></example>
   <p>After terminating the session, the parties would close the data transport as described in the relevant specification (e.g., <cite>XEP-0260</cite> or <cite>XEP-0261</cite>).</p>
   <p>For a description of the transport fallback scenario (from SOCKS5 Bytestreams to In-Band Bytestreams), refer to <cite>XEP-0260</cite>.</p>
-</section1>
-
-<section1 topic='Ranged Transfers' anchor='range'>
-  <p>As in <cite>XEP-0096</cite>, a transfer can include only part of a file (e.g., to restart delivery of a truncated transfer session at a point other than the start of the file). This is done using the &lt;range/&gt; element. The usage is illustrated in the following examples.</p>
-  <p>Let us imagine that the parties negotiate a file transfer session using, say, In-Band Bytestreams. During the transfer, the recipient goes offline unexpectedly and IBB stanzas from the sender to the recipient begin to bounce. When the recipient comes back online, the sender could initiate a new Jingle session and specify that it wants to send all chunks after byte 270336 (which might be the 66th chunk of size 4096).</p>
-  <example caption="Sender requests session to send file, with range"><![CDATA[
-<iq from='romeo@montague.lit/orchard'
-    id='wsn361c3'
-    to='juliet@capulet.lit/balcony'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='session-initiate'
-          initiator='romeo@montague.lit/orchard'
-          sid='uj3b2'>
-    <content creator='initiator' name='restart' senders='initiator'>
-      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
-        <file>
-          <range offset='270336'/>
-          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
-        </file>
-      </description>
-      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-        	 mode='tcp'
-                 sid='vj3hs98y'>
-        <candidate cid='hft54dqy'
-                   host='192.168.4.1'
-                   jid='romeo@montague.lit/orchard'
-                   port='5086'
-                   priority='8257636'
-                   type='direct'/>
-        <candidate cid='hutr46fe'
-                   host='24.24.24.1'
-                   jid='romeo@montague.lit/orchard'
-                   port='5087'
-                   priority='8258636'
-                   type='direct'/>
-      </transport>
-    </content>
-  </jingle>
-</iq>]]></example>
 </section1>
 
 </xep>
