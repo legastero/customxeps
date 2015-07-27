@@ -319,7 +319,7 @@
       <td>OPTIONAL</td>
     </tr>
   </table>
-  <p>One or more &lt;hash/&gt; elements MUST be present when offering a file, but those elements MAY be empty if the hash has not yet been computed. If there is no computed hash value, the &lt;hash/&gt; element(s) MUST possess an 'algo' attribute specifying which hash algorithm will be used. Once a hash has been calculated by the sender, the receiver can be informed of the hash value as described in <link url='#checksum'>Checksum</link>.</p>
+  <p>One or more &lt;hash/&gt; elements MUST be present when offering a file, but those elements MAY be empty if the hash has not yet been computed. If there is no computed hash value, the &lt;hash/&gt; element(s) MUST possess an 'algo' attribute specifying which hash algorithm will be used. Once a hash has been calculated by the File Sender, the File Receiver SHOULD be informed of the hash value as described in <link url='#checksum'>Checksum</link>.</p>
   <p>The optional &lt;range/&gt; element MAY possess two attributes:</p>
   <table caption='Range Element Attributes'>
     <tr>
@@ -338,8 +338,8 @@
       <td>OPTIONAL</td>
     </tr>
   </table>
-  <p>Inclusion of a &lt;range/&gt; element when offering a file indicates support of ranged transfers for future file requests if the transfer is interrupted and needs to be restarted.</p>
-  <p>A &lt;range/&gt; element MAY include an 'offset' attribute set to start the transfer at a point other than the start of the file, and MAY include a 'length' attribute to request a portion of the file smaller than the total length. If no 'offset' or 'length' attributes are present then it is the same as if no &lt;range/&gt; element was present, as the default values of the attributes would indicate a requested range of the entire file. In general, the first byte of data to be transferred is at the (zero-indexed) position specified by the 'offset' value, with a total of 'length' bytes sent.</p>
+  <p>Inclusion of a &lt;range/&gt; element in a File Offer indicates support of ranged transfers for future File Requests if the transfer is interrupted and needs to be restarted.</p>
+  <p>A &lt;range/&gt; element MAY include an 'offset' attribute set to begin the transfer at a point other than the start of the file, and MAY include a 'length' attribute to request a portion of the file smaller than the remaining length of the file. If no 'offset' or 'length' attributes are present then it is the same as if no &lt;range/&gt; element was present, as the default values of the attributes would indicate a requested range of the entire file. In general, the first byte of data to be transferred is at the (zero-indexed) position specified by the 'offset' value, with a total of 'length' bytes sent.</p>
 </section1>
 
 <section1 topic='Negotiating a Jingle File Transfer Session'>
@@ -478,7 +478,7 @@ Initiator                    Responder
 
   <section2 topic='Ranged Transfers' anchor='range'>
     <p>As in <cite>XEP-0096</cite>, a transfer can include only part of a file (e.g., to restart delivery of a truncated transfer session at a point other than the start of the file). This is done using the &lt;range/&gt; element. The usage is illustrated in the following examples.</p>
-    <p>Let us imagine that the parties negotiate a file transfer session using, say, In-Band Bytestreams. During the transfer, the recipient goes offline unexpectedly and IBB stanzas from the sender to the recipient begin to bounce. When the recipient comes back online, the sender could initiate a new Jingle session and specify that it wants to send all chunks after byte 270336 (which might be the 66th chunk of size 4096).</p>
+    <p>Let us imagine that the parties negotiate a file transfer session using, say, In-Band Bytestreams. During the transfer, the recipient goes offline unexpectedly and IBB stanzas from the File Sender to the File Receiver begin to bounce. When the recipient comes back online, the sender could initiate a new Jingle session and specify that it wants to send all chunks after byte 270336 (which might be the 66th chunk of size 4096).</p>
     <example caption="File Sender requests session to send file, with range"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='wsn361c3'
@@ -567,8 +567,8 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Checksum' anchor='hash'>
-    <p>At any time during the lifetime of the file transfer session, the hosting entity (i.e., the entity where the file resides) can communicate the checksum of the file to the receiving entity.</p>
-    <p>This can be done in the session-initiate message if the sender already knows the checksum, as shown above in Example [TODO: get example number].</p>
+    <p>At any time during the lifetime of the file transfer session, the File Sender can communicate the checksum of the file to the File Receiver.</p>
+    <p>This can be done in the session-initiate message if the File Sender already knows the checksum, as shown above in Example [TODO: get example number].</p>
     <p>After the session-initiate message, this can also be done by sending a session-info message containing a &lt;checksum/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace. The &lt;checksum/&gt; element SHOULD contain 'creator' and 'name' attributes sufficient to identitfy the content the checksum belongs to.  Additionally, the &lt;checksum/&gt; element MUST contain a &lt;file/&gt; element which MUST contain at least one &lt;hash/&gt; element qualified by the 'urn:xmpp:hashes:1' namespace. Each &lt;hash/&gt; element contains a checksum of the file data produced in accordance with the hashing function specified by the 'algo' attribute, which MUST be one of the functions listed in the &ianahashes;.</p>
     <example caption="Initiator sends checksum in session-info"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
@@ -855,7 +855,7 @@ Initiator                    Responder
   </jingle>
 </iq>]]></example>
   <p>Note: As in <cite>XEP-0096</cite>, inclusion of the &lt;range/&gt; child of the &lt;file/&gt; element indicates that the initiatior supports ranged transfers as described below under <link url='#range'>Ranged Transfers</link>.</p>
-  <p>Note: Computing the hash of the file before sending it can slow down the process of file transfer, since the sending application needs to process the file twice. The sender might prefer to send the hash after the file transfer has begun, using a transport-info message as described under <link url='#hash'>Checksum</link>.</p>
+  <p>Note: Computing the hash of the file before sending it can slow down the process of file transfer, since the sending application needs to process the file twice. The File Sender might prefer to send the hash after the file transfer has begun, using a transport-info message as described under <link url='#hash'>Checksum</link>.</p>
   <p>The responder immediately acknowledges receipt of the Jingle session-initiate.</p>
   <example caption="Responder acknowledges session-initiate"><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
