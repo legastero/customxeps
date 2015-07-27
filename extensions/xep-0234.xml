@@ -410,7 +410,7 @@ Initiator                    Responder
     </content>
   </jingle>
 </iq>]]></example>
-    <p>If the requested file can not be found, then the File Sender SHOULD send either a session-terminate or content-reject action in response to the session-initiate or content-add request, and SHOULD include a Jingle reason of &lt;failed-application/&gt;.</p>
+     <p>If the requested file can not be found (or the requester does not have permission to request or know about the existence of the file in question), then the File Sender SHOULD send either a session-terminate or content-reject action in response to the session-initiate or content-add request, and SHOULD include a Jingle reason of &lt;failed-application/&gt; and MAY include an application specific reason of a &lt;file-not-available/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:errors:0' namespace.</p>
      <example caption="File Sender rejects file request because the file could not be found"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='wsn361c9'
@@ -422,6 +422,7 @@ Initiator                    Responder
     <content creator='initiator' name='requesting-file' senders='initiator'>
     <reason>
       <failed-application />
+      <file-not-available xmlns='urn:xmpp:jingle:apps:file-transfer:errors:0' />
     </reason>
   </jingle>
 </iq>]]></example>
@@ -720,7 +721,9 @@ Initiator                    Responder
 </section1>
 
 <section1 topic='XML Schema' anchor='schema'>
-  <code><![CDATA[
+
+  <section2 topic='urn:xmpp:jingle:apps:file-transfer:4' anchor='schemas-file-transfer'>
+    <code><![CDATA[
 <?xml version='1.0' encoding='UTF-8'?>
 
 <xs:schema
@@ -775,6 +778,22 @@ Initiator                    Responder
   </xs:complexType>
 
 </xs:schema>]]></code>
+  </section2>
+
+  <section2 topic='urn:xmpp:jingle:apps:file-transfer:errors:0' anchor='schema-file-transfer-errors'>
+    <code><![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+
+<xs:schema
+    xmlns:xs='http://www.w3.org/2001/XMLSchema'
+    targetNamespace='urn:xmpp:jingle:apps:file-transfer:4'
+    xmlns='urn:xmpp:jingle:apps:file-transfer:errors:0'
+    elementFormDefault='qualified'>
+
+  <xs:element name='file-not-available' type='empty' />
+
+</xs:schema>]]></code>
+  </section2>
 </section1>
 
 <section1 topic='Acknowledgements' anchor='ack'>
