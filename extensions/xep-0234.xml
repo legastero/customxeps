@@ -198,7 +198,7 @@
   <ol>
     <li><p>The application format negotiation process is defined in the <link url='#negotiation'>Negotiating a Jingle File Transfer Session</link> section of this document.</p></li>
     <li><p>The semantics of the &DESCRIPTION; element are defined in the <link url='#format'>Application Format</link> section of this document.</p></li>
-    <li><p>The Jingle File Transfer application format is not directly mappable to SDP.</p></li>
+    <li><p>A mapping of Jingle semantics to the Session Description Protocol is provided in the <link url='#sdp'>Mapping to Session Description Protocol</link> section of this document.</p></li>
     <li><p>A Jingle File Transfer session SHOULD use a streaming transport method (e.g. &xep0260; or &xep0261;).</p></li>
     <li><p>Transport components are not used in Jingle File Transfer.</p></li>
     <li>
@@ -506,6 +506,10 @@ Initiator                    Responder
   <section2 topic='Ending the Session'>
     <p>[Close session when data received. For sender, optionally wait for receiver to close session but terminate session after sufficient time.]</p>
   </section2>
+</section1>
+
+<section1 topic='Mapping to Session Description Protocol' anchor='sdp'>
+  <p>[ Show mapping to RFC 5547 ]</p>
 </section1>
 
 <section1 topic='Informational Messages'>
