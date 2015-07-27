@@ -193,6 +193,27 @@
   <p>Note: It is likely that a future version of this specification will also recommend implementation of a Jingle transport method that emulates the IETF's ICE-TCP technology, as specified in &rfc6544;.</p>
 </section1>
 
+<section1 topic='Terminology' anchor='terms'>
+  <dl>
+    <di>
+      <dt>File Offer</dt>
+      <dd>A Jingle File Transfer Content is said to be a File Offer if the content creator is the same as the content sender (see <link url='#content-senders'>Use of Jingle Content Senders</link>).</dd>
+    </di>
+    <di>
+      <dt>File Request</dt>
+      <dd>A Jingle File Transfer Content is said to be a File Request if the content creator is the opposite of the content sender (see <link url='#content-senders'>Use of Jingle Content Senders</link>).</dd>
+    </di>
+    <di>
+      <dt>File Sender</dt>
+      <dd>The File Sender is the side of the Jingle session responsible for sending the file data. The File Sender is not necessarily the same entity as the Jingle session initiator, and an entity could be both a File Sender and File Receiver in the context of a single Jingle session with multiple files.</dd>
+    </di>
+    <di>
+      <dt>File Receiver</dt>
+      <dd>The File Receiver is the side of the Jingle session responsible for receiving the file data. The File Receiver is not necessarily the same entity as the Jingle session responder, and an entity could be both a File Receiver and File Sender in the context of a single Jingle session with multiple files.</dd>
+    </di>
+  </dl>
+</section1>
+
 <section1 topic='Jingle Conformance'>
   <p>In accordance with Section 12 of <cite>XEP-0166</cite>, this document specifies the following information related to the Jingle File Transfer ("Jingle FT") application type:</p>
   <ol>
@@ -209,7 +230,8 @@
 
   <section2 topic='Use of Jingle Content Senders' anchor='content-senders'>
     <p>Jingle File Transfer makes critical use of the 'senders' attribute of Jingle &CONTENT; elements in order to specify which party is responsible for sending the described file. As such, Jingle File Transfer content MUST include a 'senders' attribute where the allowed values are "initiator" and "responder". The semantics of the values "both" and "none" are undefined in Jingle File Transfer and thus NOT RECOMMENDED for use with Jingle File Transfer content.</p>
-    <p>In general, a Jingle File Transfer content is said to be an "offer" if the 'senders' attribute is the same as the role of the party adding the content to the session, and a "request" if the 'senders' value is the opposite role of the party adding the content.</p>
+    <p>In general, a Jingle File Transfer content is said to be a "File Offer" if the 'senders' attribute is the same as the role of the party adding the content to the session, and a "File Request" if the 'senders' value is the opposite role of the party adding the content.</p>
+    <p>Note: The content 'creator' attribute does <em>not</em> specify who created or is sending the file, it only specifies which party to the session added the Jingle content to the session.</p>
     <table caption='Distinguishing File Offers and Requests'>
       <tr>
         <th>Jingle Session Role</th>
@@ -219,22 +241,22 @@
       <tr>
         <td>initiator</td>
         <td>initiator</td>
-        <td>Offer</td>
+        <td>File Offer</td>
       </tr>
       <tr>
         <td>initiator</td>
         <td>responder</td>
-        <td>Request</td>
+        <td>File Request</td>
       </tr>
       <tr>
         <td>responder</td>
         <td>initiator</td>
-        <td>Request</td>
+        <td>File Request</td>
       </tr>
       <tr>
         <td>responder</td>
         <td>responder</td>
-        <td>Offer</td>
+        <td>File Offer</td>
       </tr>
     </table>
   </section2>
@@ -245,7 +267,7 @@
   <p>The application format consists of a file description contained within a &DESCRIPTION; element qualified by the "urn:xmpp:jingle:apps:file-transfer:4" namespace &VNOTE;. The file description is a &lt;file/&gt; element specifying metadata such as the name of the file, media type, etc, as illustrated in the following example.</p>
   <code><![CDATA[
     <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
-      <file id='b90cd254-827b-4dd0-a8af-067f091501d8'>
+      <file>
         <media-type>text/plain</media-type>
         <name>test.txt</name>
         <date>2015-07-26T21:46:00</date>
@@ -283,7 +305,7 @@
     </tr>
     <tr>
       <td>name</td>
-      <td>The name of the file. Note that this is <em>not</em> the full path or location of the file (see <link url='#security'>Security Considerations</link>).</td>
+      <td>The name of the file. The name SHOULD NOT contain characters or character sequences that would be interpreted as a directory structure by the local file system (e.g. "/", "\", "../", etc.). If any such characters or character sequences are present (possibly because the local and remote file systems use different syntax for directory structure), they SHOULD be escaped before using the name as part of any file system operation. See <link url='#security'>Security Considerations</link>.</td>
       <td>OPTIONAL</td>
     </tr>
     <tr>
@@ -297,8 +319,7 @@
       <td>OPTIONAL</td>
     </tr>
   </table>
-  <p>The &lt;file/&gt; element also MAY possess an 'id' attribute uniquely identifying the file offered or requested. Inclusion of an 'id' attribute is typically done when requesting a file that has been advertised by a hosting entity. While a hash can also be used to identify a file, the 'id' attribute can be used in cases where a hash has not yet been calculated.</p>
-  <p>One or more &lt;hash/&gt; elements MUST be present when offering a file, but it MAY be empty if the hash has not yet been computed. If there is no computed hash value, the &lt;hash/&gt; element(s) MUST possess an 'algo' attribute specifying which hash algorithm will be used. Once a hash has been calculated by the sender, the receiver can be informed of the hash value as described in <link url='#checksum'>Checksum</link>.</p>
+  <p>One or more &lt;hash/&gt; elements MUST be present when offering a file, but those elements MAY be empty if the hash has not yet been computed. If there is no computed hash value, the &lt;hash/&gt; element(s) MUST possess an 'algo' attribute specifying which hash algorithm will be used. Once a hash has been calculated by the sender, the receiver can be informed of the hash value as described in <link url='#checksum'>Checksum</link>.</p>
   <p>The optional &lt;range/&gt; element MAY possess two attributes:</p>
   <table caption='Range Element Attributes'>
     <tr>
@@ -349,7 +370,7 @@ Initiator                    Responder
 
   <section2 topic='Requesting a File' anchor='requesting'>
     <p>If the entity that hosts a file has advertised its existence (or if a previous file transfer attempt has failed and the receiver would like to initiate another attempt), the entity that wishes to receive the file can "pull" the file from the hosting entity. This is done by sending a Jingle session-initiate to the hosting entity which includes a &lt;content/&gt; with the 'senders' attribute set to the opposite Jingle session role of the party requesting the file (see <link url='#content-senders'>Use of Jingle Content Senders</link>) and a &lt;description/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace and which includes a &lt;file/&gt; element with enough information included to identify the requested file.</p>
-    <example caption="Receiver requests hosted file"><![CDATA[
+    <example caption="File Receiver requests hosted file"><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='wsn361c3'
     to='romeo@montague.lit/orchard'
@@ -389,11 +410,26 @@ Initiator                    Responder
     </content>
   </jingle>
 </iq>]]></example>
+    <p>If the requested file can not be found, then the File Sender SHOULD send either a session-terminate or content-reject action in response to the session-initiate or content-add request, and SHOULD include a Jingle reason of &lt;failed-application/&gt;.</p>
+     <example caption="File Sender rejects file request because the file could not be found"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='wsn361c9'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='content-reject'
+          sid='uj3b2'>
+    <content creator='initiator' name='requesting-file' senders='initiator'>
+    <reason>
+      <failed-application />
+    </reason>
+  </jingle>
+</iq>]]></example>
   </section2>
 
   <section2 topic='Offering or Requesting Additional Files'>
     <p>While the Jingle File Transfer session is active, either party MAY choose to add additional files (both offers and requests) to the transfer session. To do so, a Jingle content-add action is used, as shown in the following examples.</p>
-    <example caption="Sender offers additional file"><![CDATA[
+    <example caption="File Sender offers additional file"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='wsn361c9'
     to='juliet@capulet.lit/balcony'
@@ -431,7 +467,7 @@ Initiator                    Responder
   </jingle>
 </iq>]]></example>
     <p>The other party then acks the content-add request.</p>
-    <example caption="Receiver acks content-add request"><![CDATA[
+    <example caption="File Receiver acks content-add request"><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     to='romeo@montague.lit/orchard'
     id='wsn361c9'
@@ -442,7 +478,7 @@ Initiator                    Responder
   <section2 topic='Ranged Transfers' anchor='range'>
     <p>As in <cite>XEP-0096</cite>, a transfer can include only part of a file (e.g., to restart delivery of a truncated transfer session at a point other than the start of the file). This is done using the &lt;range/&gt; element. The usage is illustrated in the following examples.</p>
     <p>Let us imagine that the parties negotiate a file transfer session using, say, In-Band Bytestreams. During the transfer, the recipient goes offline unexpectedly and IBB stanzas from the sender to the recipient begin to bounce. When the recipient comes back online, the sender could initiate a new Jingle session and specify that it wants to send all chunks after byte 270336 (which might be the 66th chunk of size 4096).</p>
-    <example caption="Sender requests session to send file, with range"><![CDATA[
+    <example caption="File Sender requests session to send file, with range"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='wsn361c3'
     to='juliet@capulet.lit/balcony'
@@ -482,7 +518,7 @@ Initiator                    Responder
   <section2 topic='Aborting a Transfer'>
     <p>When there is only a single Jingle content, ending the session itself is sufficient to abort the transfer process.</p>
     <p>At any point, either party MAY choose to abort the transfer of a file. To do so, a Jingle content-remove action is used, as shown in the following example.</p>
-    <example caption='Receiver aborts the transfer'><![CDATA[
+    <example caption='File Receiver aborts the transfer'><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='jp2ba614'
     to='romeo@montague.lit/orchard'
@@ -495,7 +531,7 @@ Initiator                    Responder
   </jingle>
 </iq>]]></example>
     <p>The other pary then acks the content-remove request.</p>
-    <example caption='Sender acks abort request'><![CDATA[
+    <example caption='File Sender acks abort request'><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='jp2ba614'
     to='juliet@capulet.lit/balcony'
@@ -515,7 +551,7 @@ Initiator                    Responder
 <section1 topic='Informational Messages'>
   <section2 topic='Received'>
       <p>Once a file has been successfully received, the recipient MAY send a Jingle session-info message indicating receipt of the complete file, which consists of a &lt;received/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace. The &lt;received/&gt; element SHOULD contain 'creator' and 'name' attributes sufficient to identify the content that was received.</p>
-    <example caption='Receiver sends ack in session-info'><![CDATA[
+    <example caption='File Receiver sends ack in session-info'><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='jp2ba614'
     to='romeo@montague.lit/orchard'
@@ -530,10 +566,9 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Checksum' anchor='hash'>
-    <p>[ Rework text about &lt;file/&gt; wrapping element ]</p>
     <p>At any time during the lifetime of the file transfer session, the hosting entity (i.e., the entity where the file resides) can communicate the checksum of the file to the receiving entity.</p>
-    <p>This can be done in the session-initiate message if the sender already knows the checksum, as shown above in Example 1.</p>
-    <p>After the session-initiate message, this can also be done by sending a session-info message containing a &lt;checksum/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace. The &lt;checksum/&gt; element SHOULD contain 'creator' and 'name' attributes sufficient to identitfy the content the checksum belongs to.  Additionally, the &lt;checksum/&gt; element SHOULD contain at least one &lt;hash/&gt; element qualified by the 'urn:xmpp:hashes:1' namespace. Each &lt;hash/&gt; element contains a checksum of the file data produced in accordance with the hashing function specified by the 'algo' attribute, which MUST be one of the functions listed in the &ianahashes;.</p>
+    <p>This can be done in the session-initiate message if the sender already knows the checksum, as shown above in Example [TODO: get example number].</p>
+    <p>After the session-initiate message, this can also be done by sending a session-info message containing a &lt;checksum/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace. The &lt;checksum/&gt; element SHOULD contain 'creator' and 'name' attributes sufficient to identitfy the content the checksum belongs to.  Additionally, the &lt;checksum/&gt; element MUST contain a &lt;file/&gt; element which MUST contain at least one &lt;hash/&gt; element qualified by the 'urn:xmpp:hashes:1' namespace. Each &lt;hash/&gt; element contains a checksum of the file data produced in accordance with the hashing function specified by the 'algo' attribute, which MUST be one of the functions listed in the &ianahashes;.</p>
     <example caption="Initiator sends checksum in session-info"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='kqh401b5'
@@ -550,7 +585,7 @@ Initiator                    Responder
     </checksum>
   </jingle>
 </iq>]]></example>
-    <p>If a ranged transfer was requested, the &lt;checksum/&gt; element MAY include a &lt;range/&gt; element specifying the offset and length of the requested range, which in turn includes &lt;hash/&gt; element(s) with hashes of the data that was transferred for that range.</p>
+    <p>If a ranged transfer was requested, the &lt;file/&gt; element inside the &lt;checksum/&gt; element MAY include a &lt;range/&gt; element specifying the offset and length of the requested range, which in turn includes &lt;hash/&gt; element(s) with hashes of the data that was transferred for that range.</p>
     <example caption="Initiator sends checksum in session-info for a specific range"><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='kqh401b5'
@@ -888,7 +923,7 @@ Initiator                    Responder
   <p>(See <cite>XEP-0260</cite> for further details.)</p>
   <p>Now the parties exchange the file using the negotiated transport (here, SOCKS5 Bytestreams).</p>
   <p>Once the transfer is completed, either party can acknowledge completion or terminate the Jingle session; preferably this is done by the entity that receives the file to ensure that the complete file (up to the advertised size) has been received.</p>
-  <example caption="Receiver sends session-terminate"><![CDATA[
+  <example caption="File Receiver sends session-terminate"><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='og61bvs98'
     to='romeo@montague.lit/orchard'
