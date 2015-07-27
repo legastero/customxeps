@@ -2,7 +2,7 @@
 
 <!--
 
-Copyright (c) 1999 - 2013 XMPP Standards Foundation
+Copyright (c) 1999 - 2014 XMPP Standards Foundation
 
 Permission is hereby granted, free of charge, to any 
 person obtaining a copy of this software and 
@@ -44,6 +44,11 @@ OR OTHER DEALINGS IN THE SOFTWARE.
         <link href="../prettify.css" type="text/css" rel="stylesheet" />
         <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
         <script type="text/javascript" src="../prettify.js"></script>
+        <!-- making things mobile-friendly... -->
+        <meta>
+          <xsl:attribute name='name'><xsl:text>viewport</xsl:text></xsl:attribute>
+          <xsl:attribute name='content'>width=device-width; initial-scale=1.0; maximum-scale=2.0</xsl:attribute>
+        </meta>
         <!-- BEGIN META TAGS FOR DUBLIN CORE -->
         <meta>
           <xsl:attribute name='name'><xsl:text>DC.Title</xsl:text></xsl:attribute>
@@ -126,7 +131,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
           </xsl:if>
           <tr valign='top'>
             <td><strong>Copyright:</strong></td>
-            <td>&#169; 1999 - 2013 XMPP Standards Foundation. <a href='#appendix-legal'>SEE LEGAL NOTICES</a>.</td>
+            <td>&#169; 1999 - 2014 XMPP Standards Foundation. <a href='#appendix-legal'>SEE LEGAL NOTICES</a>.</td>
           </tr>
           <tr valign='top'>
             <td><strong>Status:</strong></td>
@@ -191,7 +196,10 @@ OR OTHER DEALINGS IN THE SOFTWARE.
           <p style='color:red'>WARNING: This document has been obsoleted by the XMPP Standards Foundation. Implementation of the protocol described herein is not recommended. Developers desiring similar functionality are advised to implement the protocol that supersedes this one (if any).</p>
         </xsl:if>
         <xsl:if test='$thestatus = "Proposed"'>
-          <p style='color:red'>NOTICE: This document is currently within Last Call or under consideration by the XMPP Council for advancement to the next stage in the XSF standards process. The Last Call ends on <xsl:value-of select='/xep/header/lastcall'/>. Please send your feedback to the <a href='http://mail.jabber.org/mailman/listinfo/standards'>standards@xmpp.org</a> discussion list.</p>
+          <p style='color:red'>NOTICE: This document is currently within Last Call or under consideration by the XMPP Council for advancement to the next stage in the XSF standards process.
+            <xsl:if test='/xep/header/lastcall'>The Last Call ends on <xsl:value-of select='/xep/header/lastcall'/>.
+            </xsl:if>
+            Please send your feedback to the <a href='http://mail.jabber.org/mailman/listinfo/standards'>standards@xmpp.org</a> discussion list.</p>
         </xsl:if>
         <xsl:if test='$thestatus = "ProtoXEP"'>
           <p style='color:red'>WARNING: This document has not yet been accepted for consideration or approved in any official manner by the XMPP Standards Foundation, and this document is not yet an XMPP Extension Protocol (XEP). If this document is accepted as a XEP by the XMPP Council, it will be published at &lt;<a href="http://xmpp.org/extensions/">http://xmpp.org/extensions/</a>&gt; and announced on the &lt;standards@xmpp.org&gt; mailing list.</p>
@@ -1028,6 +1036,10 @@ OR OTHER DEALINGS IN THE SOFTWARE.
     <span class='em'>
       <xsl:apply-templates/>
     </span>
+  </xsl:template>
+
+  <xsl:template match='sub'>
+    <sub><xsl:apply-templates/></sub>
   </xsl:template>
 
   <xsl:template match='pre'>
