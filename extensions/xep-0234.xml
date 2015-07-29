@@ -266,15 +266,15 @@
   <p>A Jingle File Transfer session is described by a content type that contains one application format and one transport method. Each &CONTENT; element defines the details of a single file transfer. A Jingle negotiation MAY result in the establishment of multiple file transfers by including multiple &CONTENT; elements.</p>
   <p>The application format consists of a file description contained within a &DESCRIPTION; element qualified by the "urn:xmpp:jingle:apps:file-transfer:4" namespace &VNOTE;. The file description is a &lt;file/&gt; element specifying metadata such as the name of the file, media type, etc, as illustrated in the following example.</p>
   <code><![CDATA[
-    <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
-      <file>
-        <media-type>text/plain</media-type>
-        <name>test.txt</name>
-        <date>2015-07-26T21:46:00</date>
-        <size>6144</size>
-        <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
-      </file>
-    </description>]]></code>
+<description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+  <file>
+    <media-type>text/plain</media-type>
+    <name>test.txt</name>
+    <date>2015-07-26T21:46:00</date>
+    <size>6144</size>
+    <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+  </file>
+</description>]]></code>
   <p>The &DESCRIPTION; element is intended to be a child of a Jingle &CONTENT; element as specified in <cite>XEP-0166</cite>.</p>
   <p>The contents of the &lt;file/&gt; element are as follows:</p>
   <table caption='File Description Contents'>
@@ -315,7 +315,7 @@
     </tr>
     <tr>
       <td>range</td>
-      <td>The &lt;range/&gt; element indicates support of ranged transferes, and can be used to control where a transfer starts.</td>
+      <td>The presence of the &lt;range/&gt; element indicates support of ranged transfers, and can be used to control where a transfer starts.</td>
       <td>OPTIONAL</td>
     </tr>
   </table>
@@ -362,14 +362,12 @@ Initiator                    Responder
    |============================>|
    |                             |]]></code>
 
-  <p>When the initiator sends a session-initiate message to the responder, the &DESCRIPTION; element MUST include</p>
-
   <section2 topic='Offering a File' anchor='offering'>
     <p>[Use 'session-initiate' with right senders.]</p>
   </section2>
 
   <section2 topic='Requesting a File' anchor='requesting'>
-    <p>If the entity that hosts a file has advertised its existence (or if a previous file transfer attempt has failed and the receiver would like to initiate another attempt), the entity that wishes to receive the file can "pull" the file from the hosting entity. This is done by sending a Jingle session-initiate to the hosting entity which includes a &lt;content/&gt; with the 'senders' attribute set to the opposite Jingle session role of the party requesting the file (see <link url='#content-senders'>Use of Jingle Content Senders</link>) and a &lt;description/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace and which includes a &lt;file/&gt; element with enough information included to identify the requested file.</p>
+    <p>If the entity that hosts a file has advertised its existence (or if a previous file transfer attempt has failed and the receiver would like to initiate another attempt), the entity that wishes to receive the file can "pull" the file from the hosting entity. This is done by sending a Jingle session-initiate to the hosting entity which includes a &lt;content/&gt; with the 'senders' attribute set to the opposite Jingle session role of the party requesting the file (see <link url='#content-senders'>Use of Jingle Content Senders</link>) and a &lt;description/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:4' namespace and which includes a &lt;file/&gt; element with enough information included to form a "file selector" (see Section 5 of &rfc5547;) to identify the requested file.</p>
     <example caption="File Receiver requests hosted file"><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='wsn361c3'
@@ -542,11 +540,41 @@ Initiator                    Responder
 
   <section2 topic='Ending the Session'>
     <p>[Close session when data received. For sender, optionally wait for receiver to close session but terminate session after sufficient time.]</p>
+
   </section2>
 </section1>
 
 <section1 topic='Mapping to Session Description Protocol' anchor='sdp'>
-  <p>[ Show mapping to RFC 5547 ]</p>
+  <p>&rfc5547; defines the general process for including file transfer information in SDP.</p>
+  <p>The SDP media type for Jingle File Transfer can be "message" (e.g. when used with &rfc4975;) or "application"; however, this media value is not reflected in the Jingle File Transfer application format.</p>
+  <p>Any combination of &lt;name/&gt;, &lt;size/&gt;, &lt;media-type/&gt;and &lt;hash/&gt; values MAY be used to form a "file selector" (see Section 5 of &rfc5547;), which would be mapped to SDP as follows:</p>
+  <code><![CDATA[
+a=file-selector [name:"<name>"] [size:<size>] [type:<media-type>] [hash:<hash algo>:<hash value>]]]></code>
+  <p>(The hash value MUST be encoded as hexadecimal with each byte separated by a colon.)</p>
+  <p>The &lt;date/&gt; value is the last modified time of the file, and thus is mapped as follows:</p>
+  <code><![CDATA[
+a=file-date:modification:"<date>"]]></code>
+  <p>Note: the format used here for &lt;date&gt; is the date-time format defined in &rfc5322;.</p>
+  <p>If a range is specified, the SDP mapping requires both a start and stop offset. If no length was specified for the range, the stop offset is "*". If a length was specified, the stop offset is the &lt;range/&gt; offset value plus the length.</p>
+  <code><![CDATA[
+a=file-range:<offset>-<(offset + length) | *>]]></code>
+  <p>As a full example, given the following Jingle File Transfer content description:</p>
+  <code><![CDATA[
+<description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+  <file>
+    <media-type>text/plain</media-type>
+    <name>test.txt</name>
+    <date>2015-07-26T21:46:00</date>
+    <size>6144</size>
+    <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+    <range offset='1024' />
+  </file>
+</description>]]></code>
+    <p>The equivalent SDP would be:</p>
+    <code><![CDATA[
+a=file-selector: name:"test.txt" size:6144 type:text/plain hash:sha-1:55:2D:A7:49:93:08:52:C6:9A:E5:D2:14:1D:37:66:B1
+a=file-date:modification:"26 Jul 2015 21:46:00"
+a=file-range:1024-*]]></code>
 </section1>
 
 <section1 topic='Informational Messages'>
