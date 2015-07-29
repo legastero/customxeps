@@ -515,8 +515,22 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Aborting a Transfer'>
-    <p>When there is only a single Jingle content, ending the session itself is sufficient to abort the transfer process.</p>
-    <p>At any point, either party MAY choose to abort the transfer of a file. To do so, a Jingle content-remove action is used, as shown in the following example.</p>
+    <p>At any point, either party MAY choose to abort the transfer of a single file, or end the session entirely to abort all active transfers.</p>
+    <p>When there is only a single Jingle content or if a party wishes to abort the transfer of all files in the session, a session-terminate including a Jingle reason of &lt;cancel /&gt; is sent.</p>
+    <example caption='File Receiver aborts all active file transfers'><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    id='jp2ba614'
+    to='romeo@montague.lit/orchard'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-terminate'
+          sid='a73sjjvkla37jfea'>
+    <reason>
+      <cancel />    
+    </reason>
+  </jingle>
+</iq>]]></example>
+    <p>If a party chooses to abort the transfer of a single file out of several active transfers, a Jingle content-remove action is used, which MAY include a Jingle reason of &lt;cancel/&gt;, as shown in the following example.</p>
     <example caption='File Receiver aborts the transfer'><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='jp2ba614'
@@ -527,6 +541,9 @@ Initiator                    Responder
           initiator='romeo@montague.lit/orchard'
           sid='a73sjjvkla37jfea'>
     <content creator='initiator' name='a-file-offer' />
+    <reason>
+      <cancel />    
+    </reason>
   </jingle>
 </iq>]]></example>
     <p>The other party then acks the content-remove request.</p>
