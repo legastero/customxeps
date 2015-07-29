@@ -363,7 +363,116 @@ Initiator                    Responder
    |                             |]]></code>
 
   <section2 topic='Offering a File' anchor='offering'>
-    <p>[Use 'session-initiate' with right senders.]</p>
+    <p>To start a File Offer, the initiator sends a Jingle session-initiation request to a potential responder. The request specifies three things:</p>
+    <ol>
+      <li>A content 'senders' attribute with the value of 'initiator' to indicate this is a File Offer.</li>
+      <li>An application type of "urn:xmpp:jingle:apps:file-transfer:4". In particular, the &lt;description/&gt; element contains a &lt;file/&gt; elements describing the file to be sent.</li>
+      <li>An appropriate transport method. So far the suggested methods are jingle-s5b (<cite>XEP-0260</cite>) and, as a fallback, jingle-ibb (<cite>XEP-0261</cite>).</li>
+    </ol>
+    <p>In this example, the initiator is &lt;romeo@montague.lit&gt;, the responder is &lt;juliet@capulet.lit&gt;, the application type is a file offer, and the transport method is jingle-s5b.</p>
+    <p>The flow is as follows.</p>
+    <p>First the initiator sends a Jingle session-initiate.</p>
+    <example caption="Initiator sends session-initiate"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='nzu25s8'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='851ba2'>
+    <content creator='initiator' name='a-file-offer' senders='intitiator'>
+      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+        <file>
+          <date>1969-07-21T02:56:15Z</date>
+          <desc>This is a test. If this were a real file...</desc>
+          <media-type>text/plain</media-type>
+          <name>test.txt</name>
+          <range/>
+          <size>6144</size>
+          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+        </file>
+      </description>
+      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
+                 mode='tcp'
+                 sid='vj3hs98y'>
+        <candidate cid='hft54dqy'
+                   host='192.168.4.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5086'
+                   priority='8257636'
+                   type='direct'/>
+        <candidate cid='hutr46fe'
+                   host='24.24.24.1'
+                   jid='romeo@montague.lit/orchard'
+                   port='5087'
+                   priority='8258636'
+                   type='direct'/>
+      </transport>
+    </content>
+  </jingle>
+</iq>]]></example>
+    <p>Note: Inclusion of the &lt;range/&gt; child of the &lt;file/&gt; element indicates that the initiatior supports ranged transfers as described below under <link url='#range'>Ranged Transfers</link>.</p>
+    <p>Note: Computing the hash of the file before sending it can slow down the process of file transfer, since the sending application needs to process the file twice. The File Sender might prefer to send the hash after the file transfer has begun, using a transport-info message as described under <link url='#hash'>Checksum</link>.</p>
+    <p>The responder immediately acknowledges receipt of the Jingle session-initiate.</p>
+    <example caption="Responder acknowledges session-initiate"><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    id='nzu25s8'
+    to='romeo@montague.lit/orchard'
+    type='result'/>]]></example>
+    <p>The initiator then attempts to initiate a SOCKS5 Bytestream with the responder as described in <cite>XEP-0260</cite> and <cite>XEP-0065</cite>. In the meantime, the responder returns a Jingle session-accept. In the session-accept message, the &lt;file/&gt; element MAY contain a &lt;range/&gt; element to indicate that the receiver also supports ranged transfers as described below under <link url='#range'>Ranged Transfers</link>.</p>
+    <example caption="Responder sends session-accept"><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    id='jn2vs71g'
+    to='romeo@montague.lit/orchard'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-accept'
+          initiator='romeo@montague.lit/orchard'
+          sid='851ba2'>
+    <content creator='initiator' name='a-file-offer' senders='initiator'>
+      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
+        <file>
+          <date>1969-07-21T02:56:15Z</date>
+          <desc>This is a test. If this were a real file...</desc>
+          <media-type>text/plain</media-type>
+          <name>test.txt</name>
+          <range/>
+          <size>6144</size>
+          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+        </file>
+      </description>
+      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
+                 mode='tcp'
+                 sid='vj3hs98y'>
+        <candidate cid='ht567dq'
+                   host='192.169.1.10'
+                   jid='juliet@capulet.lit/balcony'
+                   port='6539'
+                   priority='8257636'
+                   type='direct'/>
+        <candidate cid='hr65dqyd'
+                   host='134.102.201.180'
+                   jid='juliet@capulet.lit/balcony'
+                   port='16453'
+                   priority='7929856'
+                   type='assisted'/>
+        <candidate cid='grt654q2'
+                   host='2001:638:708:30c9:219:d1ff:fea4:a17d'
+                   jid='juliet@capulet.lit/balcony'
+                   port='6539'
+                   priority='8257606'
+                   type='direct'/>
+      </transport>
+    </content>
+  </jingle>
+</iq>]]></example>
+    <p>The initiator acknowledges the Jingle session-accept.</p>
+    <example caption="Initiator acknowledges session-accept"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='jn2vs71g'
+    to='juliet@capulet.lit/balcony'
+    type='result'/>]]></example>
   </section2>
 
   <section2 topic='Requesting a File' anchor='requesting'>
@@ -856,165 +965,6 @@ a=file-range:1024-*]]></code>
 
 <section1 topic='Acknowledgements' anchor='ack'>
   <p>Thanks to Diana Cionoiu, Olivier Crête, Viktor Fast, Philipp Hancke, Waqas Hussain, Justin Karneges, Steffen Larsen, Yann Leboulanger, Marcus Lundblad, Robert McQueen, Joe Maissel, Glenn Maynard, Ali Sabil, Sjoerd Simons, Lance Stout, Will Thompson, Matthew Wild, and Jiří Zárevúcky for their feedback.</p>
-</section1>
-
-
-<section1 topic='------- v OLD CONTENT LEFT TO EDIT v -----------'></section1>
-
-
-<section1 topic='How It Works' anchor='protocol'>
-  <p>The initiator then sends a Jingle session-initiation request to a potential responder. The content-type of the request specifies three things:</p>
-  <ol>
-    <li>A content 'senders' attribute specifying which party is to send the file.</li>
-    <li>An application type of "urn:xmpp:jingle:apps:file-transfer:4". In particular, the &lt;description/&gt; element contains a &lt;file/&gt; elements describing the file to be sent.</li>
-    <li>An appropriate transport method. So far the suggested methods are jingle-s5b (<cite>XEP-0260</cite>) and, as a fallback, jingle-ibb (<cite>XEP-0261</cite>).</li>
-  </ol>
-  <p>In this example, the initiator is &lt;romeo@montague.lit&gt;, the responder is &lt;juliet@capulet.lit&gt;, the application type is a file offer, and the transport method is jingle-s5b.</p>
-  <p>The flow is as follows.</p>
- <p>First the initiator sends a Jingle session-initiate.</p>
-  <example caption="Initiator sends session-initiate"><![CDATA[
-<iq from='romeo@montague.lit/orchard'
-    id='nzu25s8'
-    to='juliet@capulet.lit/balcony'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='session-initiate'
-          initiator='romeo@montague.lit/orchard'
-          sid='851ba2'>
-    <content creator='initiator' name='a-file-offer' senders='intitiator'>
-      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
-        <file>
-          <date>1969-07-21T02:56:15Z</date>
-          <desc>This is a test. If this were a real file...</desc>
-          <media-type>text/plain</media-type>
-          <name>test.txt</name>
-          <range/>
-          <size>6144</size>
-          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
-        </file>
-      </description>
-      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-                 mode='tcp'
-                 sid='vj3hs98y'>
-        <candidate cid='hft54dqy'
-                   host='192.168.4.1'
-                   jid='romeo@montague.lit/orchard'
-                   port='5086'
-                   priority='8257636'
-                   type='direct'/>
-        <candidate cid='hutr46fe'
-                   host='24.24.24.1'
-                   jid='romeo@montague.lit/orchard'
-                   port='5087'
-                   priority='8258636'
-                   type='direct'/>
-      </transport>
-    </content>
-  </jingle>
-</iq>]]></example>
-  <p>Note: As in <cite>XEP-0096</cite>, inclusion of the &lt;range/&gt; child of the &lt;file/&gt; element indicates that the initiatior supports ranged transfers as described below under <link url='#range'>Ranged Transfers</link>.</p>
-  <p>Note: Computing the hash of the file before sending it can slow down the process of file transfer, since the sending application needs to process the file twice. The File Sender might prefer to send the hash after the file transfer has begun, using a transport-info message as described under <link url='#hash'>Checksum</link>.</p>
-  <p>The responder immediately acknowledges receipt of the Jingle session-initiate.</p>
-  <example caption="Responder acknowledges session-initiate"><![CDATA[
-<iq from='juliet@capulet.lit/balcony'
-    id='nzu25s8'
-    to='romeo@montague.lit/orchard'
-    type='result'/>]]></example>
-  <p>The initiator then attempts to initiate a SOCKS5 Bytestream with the responder as described in <cite>XEP-0260</cite> and <cite>XEP-0065</cite>. In the meantime, the responder returns a Jingle session-accept. In the session-accept message, the &lt;file/&gt; element MAY contain a &lt;range/&gt; element to indicate that the receiver also supports ranged transfers as described below under <link url='#range'>Ranged Transfers</link>.</p>
-  <example caption="Responder sends session-accept"><![CDATA[
-<iq from='juliet@capulet.lit/balcony'
-    id='jn2vs71g'
-    to='romeo@montague.lit/orchard'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='session-accept'
-          initiator='romeo@montague.lit/orchard'
-          sid='851ba2'>
-    <content creator='initiator' name='a-file-offer' senders='initiator'>
-      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
-        <file>
-          <date>1969-07-21T02:56:15Z</date>
-          <desc>This is a test. If this were a real file...</desc>
-          <media-type>text/plain</media-type>
-          <name>test.txt</name>
-          <range/>
-          <size>6144</size>
-          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
-        </file>
-      </description>
-      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-                 mode='tcp'
-                 sid='vj3hs98y'>
-        <candidate cid='ht567dq'
-                   host='192.169.1.10'
-                   jid='juliet@capulet.lit/balcony'
-                   port='6539'
-                   priority='8257636'
-                   type='direct'/>
-        <candidate cid='hr65dqyd'
-                   host='134.102.201.180'
-                   jid='juliet@capulet.lit/balcony'
-                   port='16453'
-                   priority='7929856'
-                   type='assisted'/>
-        <candidate cid='grt654q2'
-                   host='2001:638:708:30c9:219:d1ff:fea4:a17d'
-                   jid='juliet@capulet.lit/balcony'
-                   port='6539'
-                   priority='8257606'
-                   type='direct'/>
-      </transport>
-    </content>
-  </jingle>
-</iq>]]></example>
-  <p>The initiator acknowledges the Jingle session-accept.</p>
-  <example caption="Initiator acknowledges session-accept"><![CDATA[
-<iq from='romeo@montague.lit/orchard'
-    id='jn2vs71g'
-    to='juliet@capulet.lit/balcony'
-    type='result'/>]]></example>
-  <p>Once one client has successfully created a connection, it sends a &lt;remote-candidate/&gt; element to the peer inside a Jingle transport-info message. If a client receives a remote-candidate notification it SHOULD continue trying to connect to candidates sent by its peer if it has not tried all candidates with a higher priority than the one successfully used by the peer.</p>
-  <example caption="Initiator sends remote-candidate in Jingle transport-info"><![CDATA[
-<iq from='romeo@montague.lit/orchard'
-    id='hjdi8'
-    to='juliet@capulet.lit/balcony'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='transport-info'
-          initiator='romeo@montague.lit/orchard'
-          sid='a73sjjvkla37jfea'>
-    <content creator='initiator' name='ex'>
-      <transport xmlns='urn:xmpp:jingle:transports:s5b:1'
-                 sid='vj3hs98y'>
-        <remote-candidate cid='hr65dqyd'/>
-      </transport>
-    </content>
-  </jingle>
-</iq>]]></example>
-  <p>The peer immediately acknowledges receipt.</p>
-  <example caption="Responder acknowledges remote-candidate message"><![CDATA[
-<iq from='juliet@capulet.lit/balcony'
-    id='hjdi8'
-    to='romeo@montague.lit/orchard'
-    type='result'/>]]></example>
-  <p>(See <cite>XEP-0260</cite> for further details.)</p>
-  <p>Now the parties exchange the file using the negotiated transport (here, SOCKS5 Bytestreams).</p>
-  <p>Once the transfer is completed, either party can acknowledge completion or terminate the Jingle session; preferably this is done by the entity that receives the file to ensure that the complete file (up to the advertised size) has been received.</p>
-  <example caption="File Receiver sends session-terminate"><![CDATA[
-<iq from='juliet@capulet.lit/balcony'
-    id='og61bvs98'
-    to='romeo@montague.lit/orchard'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='session-terminate'
-          sid='a73sjjvkla37jfea'>
-    <reason>
-      <success/>
-    </reason>
-  </jingle>
-</iq>]]></example>
-  <p>After terminating the session, the parties would close the data transport as described in the relevant specification (e.g., <cite>XEP-0260</cite> or <cite>XEP-0261</cite>).</p>
-  <p>For a description of the transport fallback scenario (from SOCKS5 Bytestreams to In-Band Bytestreams), refer to <cite>XEP-0260</cite>.</p>
 </section1>
 
 </xep>
