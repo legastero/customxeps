@@ -529,7 +529,7 @@ Initiator                    Responder
     <content creator='initiator' name='a-file-offer' />
   </jingle>
 </iq>]]></example>
-    <p>The other pary then acks the content-remove request.</p>
+    <p>The other party then acks the content-remove request.</p>
     <example caption='File Sender acks abort request'><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='jp2ba614'
@@ -539,7 +539,7 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Ending the Session'>
-    <p>Once all file content in the session has been transfered, either pary MAY acknowledge receipt of the received files (see <link url='#received'>Received</link>) or, if there are no other active file transfers, terminate the Jingle session. Preferably, sending the session-terminate is done by the last entity to finish receiving a file to ensure that all offered or requested files by either party have been completely received (up to the advertised sizes).</p>
+    <p>Once all file content in the session has been transfered, either party MAY acknowledge receipt of the received files (see <link url='#received'>Received</link>) or, if there are no other active file transfers, terminate the Jingle session. Preferably, sending the session-terminate is done by the last entity to finish receiving a file to ensure that all offered or requested files by either party have been completely received (up to the advertised sizes).</p>
   </section2>
 </section1>
 
