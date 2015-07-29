@@ -539,8 +539,7 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Ending the Session'>
-    <p>[Close session when data received. For sender, optionally wait for receiver to close session but terminate session after sufficient time.]</p>
-
+    <p>Once all file content in the session has been transfered, either pary MAY acknowledge receipt of the received files (see <link url='#received'>Received</link>) or, if there are no other active file transfers, terminate the Jingle session. Preferably, sending the session-terminate is done by the last entity to finish receiving a file to ensure that all offered or requested files by either party have been completely received (up to the advertised sizes).</p>
   </section2>
 </section1>
 
