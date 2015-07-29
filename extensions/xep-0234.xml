@@ -556,8 +556,22 @@ Initiator                    Responder
   </section2>
 
   <section2 topic='Ending the Session'>
-    <p>Once all file content in the session has been transfered, either party MAY acknowledge receipt of the received files (see <link url='#received'>Received</link>) or, if there are no other active file transfers, terminate the Jingle session. Preferably, sending the session-terminate is done by the last entity to finish receiving a file to ensure that all offered or requested files by either party have been completely received (up to the advertised sizes).</p>
+    <p>Once all file content in the session has been transfered, either party MAY acknowledge receipt of the received files (see <link url='#received'>Received</link>) or, if there are no other active file transfers, terminate the Jingle session with a Jingle session of &lt;success/&gt;. Preferably, sending the session-terminate is done by the last entity to finish receiving a file to ensure that all offered or requested files by either party have been completely received (up to the advertised sizes).</p>
+    <example caption='File Receiver ends the session after successfully receiving all files'><![CDATA[
+<iq from='juliet@capulet.lit/balcony'
+    id='jp2ba614'
+    to='romeo@montague.lit/orchard'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-terminate'
+          sid='a73sjjvkla37jfea'>
+    <reason>
+      <success />    
+    </reason>
+  </jingle>
+</iq>]]></example>
   </section2>
+
 </section1>
 
 <section1 topic='Mapping to Session Description Protocol' anchor='sdp'>
