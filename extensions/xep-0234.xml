@@ -517,22 +517,7 @@ Initiator                    Responder
     </content>
   </jingle>
 </iq>]]></example>
-     <p>If the requested file can not be found (or the requester does not have permission to request or know about the existence of the file in question), then the File Sender SHOULD send either a session-terminate or content-reject action in response to the session-initiate or content-add request, and SHOULD include a Jingle reason of &lt;failed-application/&gt; and MAY include an application specific reason of a &lt;file-not-available/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:errors:0' namespace.</p>
-     <example caption="File Sender rejects file request because the file could not be found"><![CDATA[
-<iq from='romeo@montague.lit/orchard'
-    id='wsn361c9'
-    to='juliet@capulet.lit/balcony'
-    type='set'>
-  <jingle xmlns='urn:xmpp:jingle:1'
-          action='content-reject'
-          sid='uj3b2'>
-    <content creator='initiator' name='requesting-file' senders='initiator'>
-    <reason>
-      <failed-application />
-      <file-not-available xmlns='urn:xmpp:jingle:apps:file-transfer:errors:0' />
-    </reason>
-  </jingle>
-</iq>]]></example>
+    <p>See <link url='#file-not-available'>File not Available</link> for how to respond if the requester does not have permission to request the file, or if the file can not be found.</p>
   </section2>
 
   <section2 topic='Offering or Requesting Additional Files'>
@@ -816,6 +801,52 @@ a=file-range:1024-*]]></code>
   </section2>
 </section1>
 
+<section1 topic='Errors' anchor='errors'>
+  <section2 topic='File not Available' anchor='file-not-available'>
+    <p>If a requested file can not be found (or the requester does not have permission to request or know about the existence of the file in question), then the File Sender SHOULD send either a session-terminate or content-reject action in response to the session-initiate or content-add request, and SHOULD include a Jingle reason of &lt;failed-application/&gt; and MAY include an application specific reason of a &lt;file-not-available/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:errors:0' namespace.</p>
+     <example caption="File Sender rejects file request because the file could not be found"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='wsn361c9'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='content-reject'
+          sid='uj3b2'>
+    <content creator='initiator' name='requesting-file' senders='initiator'>
+    <reason>
+      <failed-application />
+      <file-not-available xmlns='urn:xmpp:jingle:apps:file-transfer:errors:0' />
+    </reason>
+  </jingle>
+</iq>]]></example>
+  </section2>
+
+  <section2 topic='File too Large' anchor='file-too-large'>
+    <p>There are several situations where a File Receiver might wish to abort a transfer due to an excess of file data, for example:</p>
+    <ul>
+        <li>The File Receiver has reached a file system storage quota or other hard limit that prevents continuing to receive file data.</li>
+        <li>The File Sender has continued sending data past the initially specified size of the file.</li>
+    </ul>
+    <p>In such cases, the File Receiver MAY abort the transfer by sending a Jingle session-terminate (or content-remove as appropriate) which includes a Jingle reason of &lt;media-error/&gt; and MAY include an application specific reason of a &lt;file-too-large/&gt; element qualified by the 'urn:xmpp:jingle:apps:file-transfer:errors:0' namespace.</p>
+     <example caption="File Sender rejects file request because the file could not be found"><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='wsn361c9'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='content-remove'
+          sid='uj3b2'>
+    <content creator='initiator' name='big-file' senders='initiator'>
+    <reason>
+      <media-error />
+      <file-too-large xmlns='urn:xmpp:jingle:apps:file-transfer:errors:0' />
+    </reason>
+  </jingle>
+</iq>]]></example>
+  </section2>
+</section1>
+
+
 <section1 topic='Implementation Notes' anchor='impl'>
   <section2 topic='Mandatory to Implement Technologies' anchor='impl-mti'>
     <p>All implementations MUST support the Jingle In-Band Bytestreams Transport Method (<cite>XEP-0261</cite>) as a reliable method of last resort. An implementation SHOULD support other transport methods as well, especially the Jingle SOCKS5 Bytestreams Transport Method (<cite>XEP-0260</cite>).</p>
@@ -958,6 +989,7 @@ a=file-range:1024-*]]></code>
     elementFormDefault='qualified'>
 
   <xs:element name='file-not-available' type='empty' />
+  <xs:element name='file-too-large' type='empty' />
 
 </xs:schema>]]></code>
   </section2>
