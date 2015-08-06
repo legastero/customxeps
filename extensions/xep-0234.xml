@@ -381,7 +381,7 @@ Initiator                    Responder
           action='session-initiate'
           initiator='romeo@montague.lit/orchard'
           sid='851ba2'>
-    <content creator='initiator' name='a-file-offer' senders='intitiator'>
+    <content creator='initiator' name='a-file-offer' senders='initiator'>
       <description xmlns='urn:xmpp:jingle:apps:file-transfer:4'>
         <file>
           <date>1969-07-21T02:56:15Z</date>
