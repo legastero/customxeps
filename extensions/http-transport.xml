@@ -141,14 +141,14 @@
   </candidate>
 </transport>]]></code>
     <p>The generation of candidates is based on the Jingle content senders, and only the parties specified to receive data SHOULD provide candidates.</p>
-    <p>Upon receiving an HTTP upload candidate, parties that are to send data (based on the Jingle content senders) SHOULD use an HTTP POST request to the candidate URI, where the request body is the data to be transferred.</p>
+    <p>Upon receiving an HTTP upload candidate, parties that are to send data (based on the Jingle content senders) SHOULD use an HTTP PUT request to the candidate URI, where the request body is the data to be transferred.</p>
 
     <table caption='Summary of Roles in Jingle HTTP Upload'>
       <tr>
         <th>Content Creator</th>
         <th>Content Senders</th>
         <th>Who Sends Upload Candidates</th>
-        <th>Who Performs HTTP POST</th>
+        <th>Who Performs HTTP PUT</th>
       </tr>
       <tr>
         <td rowspan='4'>initiator</td>
@@ -358,7 +358,7 @@
     </content>
   </jingle>
 </iq>]]></example>
-      <p>Romeo now uses an HTTP POST to upload his file. Once the upload is complete, he informs Juliet so she knows the file is ready for to read.</p>
+      <p>Romeo now uses an HTTP PUT to upload his file. Once the upload is complete, he informs Juliet so she knows the file is ready for to read.</p>
       <example caption='Signaling that the upload has completed'><![CDATA[
 <iq from='romeo@montague.lit/orchard'
     id='uw72g176'
@@ -395,7 +395,7 @@
     </content>
   </jingle>
 </iq>]]></example>
-      <p>Juliet accepts the session, and begins uploading the file data with an HTTP POST request.</p>
+      <p>Juliet accepts the session, and begins uploading the file data with an HTTP PUT request.</p>
       <example caption='Accepting the session'><![CDATA[
 <iq from='juliet@capulet.lit/balcony'
     id='nzu25s8'
