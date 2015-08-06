@@ -20,6 +20,7 @@
   <supersedes/>
   <supersededby/>
   <shortname>message-delete</shortname>
+  &lance;
   <revision>
     <version>0.0.1</version>
     <date>2015-07-07</date>
@@ -28,7 +29,7 @@
   </revision>
 </header>
 <section1 topic='Introduction' anchor='intro'>
-  <p>Occasionally, a &xep0045; MUC room moderator or admin might wish to remove certain chat messages from the room history as part of an effort to address and remedy issues such as message spam, indecent language for the venue, exposing private third-party personal information, etc. However, as with any content moderation tool, the removal request can <strong>only be considered as a hint</strong> and by itself can not prevent or undo any potential damage caused by the offending message, as clients which don't support message deletion are not obligated to enforce the deletion request and people could have seen the message content already.</p> 
+  <p>Occasionally, a &xep0045; room moderator or admin might wish to remove certain chat messages from the room history as part of an effort to address and remedy issues such as message spam, indecent language for the venue, exposing private third-party personal information, etc. However, as with any content moderation tool, the removal request can <strong>only be considered as a hint</strong> and by itself can not prevent or undo any potential damage caused by the offending message, as clients which don't support message deletion are not obligated to enforce the deletion request and people could have seen or copied the message content already.</p> 
 </section1>
 <section1 topic='Discovering support' anchor='disco'>
   <p>If a client or service implements message deletion, it MUST specify the 'urn:xmpp:message-delete:0' feature in its service discovery information features as specified in &xep0030; and the Entity Capabilities profile specified in &xep0115;.</p>
@@ -67,7 +68,7 @@
   <p>A client MAY inform the user that a no-longer displayed message did previously exist and has been removed.</p>
   <p>Clients and services MUST send ids on messages if they allow for message deletion.</p>
   <p>The Sender MUST NOT send a removal request for a message with non-messaging payloads. For example, a sender MUST NOT send a removal for a roster item exchange request or a file transfer part.</p>
-  <p>A removal MUST only be processed when both the original message and removal request are received from the same full-JID (or from a full-JID of an appropriate admin or moderation in the case of a MUC room.)</p>
+  <p>A removal MUST only be processed when both the original message and removal request are received from the same full-JID (or from a JID of an appropriate admin or moderator in the case of a MUC room.)</p>
 </section1>
 <section1 topic='Security Considerations' anchor='security'>
   <p>There can never be a guarantee that a removed message was never seen or otherwise distributed, and it is encouraged for clients and services when possible to inform users that no such guarantee exists.</p>
