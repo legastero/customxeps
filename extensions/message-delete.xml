@@ -64,9 +64,9 @@
 </section1>
 <section1 topic='Business Rules' anchor='rules'>
   <p>A receiving client can choose to remove the indicated message from whatever display is used for messages, from any stored history, or choose to display the fact that a message has been removed in another way.</p>
-  <p>A MUC or other service that supports message removal SHOULD remove the message from archived history and prevent further distribution of the message by the service.</p>
+  <p>A MUC or other service that supports message removal SHOULD prevent further distribution of the message by the service (e.g., by not replaying the message to new occupants joining the room, or omitting the message from history archive requests where possible).</p>
   <p>A client MAY inform the user that a no-longer displayed message did previously exist and has been removed.</p>
-  <p>Clients and services MUST send ids on messages if they allow for message deletion.</p>
+  <p>Clients and services MUST set the 'id' attribute on messages if they allow for message deletion.</p>
   <p>The Sender MUST NOT send a removal request for a message with non-messaging payloads. For example, a sender MUST NOT send a removal for a roster item exchange request or a file transfer part.</p>
   <p>A removal MUST only be processed when both the original message and removal request are received from the same full-JID (or from a JID of an appropriate admin or moderator in the case of a MUC room.)</p>
 </section1>
