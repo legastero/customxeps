@@ -1,0 +1,238 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE xep SYSTEM 'xep.dtd' [
+  <!ENTITY % ents SYSTEM 'xep.ent'>
+%ents;
+]>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+<header>
+  <title>Jingle Content Thumbnails</title>
+  <abstract>This specification defines a way for a client to supply a preview image for Jingle content.</abstract>
+  &LEGALNOTICE;
+  <number>0264</number>
+  <status>Experimental</status>
+  <type>Standards Track</type>
+  <sig>Standards</sig>
+  <approver>Council</approver>
+  <dependencies>
+    <spec>XMPP Core</spec>
+    <spec>XEP-0096</spec>
+    <spec>XEP-0231</spec>
+  </dependencies>
+  <supersedes/>
+  <supersededby/>
+  <shortname>thumbs</shortname>
+  <author>
+    <firstname>Marcus</firstname>
+    <surname>Lundblad</surname>
+    <email>ml@update.uu.se</email>
+    <jid>mlundblad@jabber.org</jid>
+  </author>
+  &lance;
+  <revision>
+    <version>0.4</version>
+    <date>2015-08-26</date>
+    <initials>ljts</initials>
+    <remark>
+      <p>Changed format to use generic 'uri' attribute to allow for 'https:' and 'http:' URIs in addition to BoB 'cid:' URIs.</p>
+      <p>Indicated that multiple thumbnails may be present.</p>
+      <p>Expanded scope of use cases to be Jingle content in general, not just file transfer.</p>
+    </remark>
+  </revision>
+  <revision>
+    <version>0.3</version>
+    <date>2009-04-27</date>
+    <initials>ml</initials>
+    <remark><p>Fixed typo in author's name :).</p></remark>
+  </revision>
+  <revision>
+    <version>0.2</version>
+    <date>2009-04-06</date>
+    <initials>ml</initials>
+    <remark><p>Add paragraph in security section about protecting against malicious thumbnail dimensions in offer. Fixed a typo.</p></remark>
+  </revision>
+  <revision>
+    <version>0.1</version>
+    <date>2009-04-02</date>
+    <initials>psa</initials>
+    <remark><p>Initial published version.</p></remark>
+  </revision>
+  <revision>
+    <version>0.0.3</version>
+    <date>2009-03-10</date>
+    <initials>ml</initials>
+    <remark><p>Split use-case section into "Introduction", "Requirements", and "Use case".</p>
+    </remark>
+  </revision>
+  <revision>
+    <version>0.0.2</version>
+    <date>2009-02-25</date>
+    <initials>ml</initials>
+    <remark><p>Removed service disovery.
+Added missing namespace on thumnail elements.</p>
+    </remark>
+  </revision>
+  <revision>
+    <version>0.0.1</version>
+    <date>2009-02-23</date>
+    <initials>ml</initials>
+    <remark><p>First draft.</p></remark>
+  </revision>
+</header>
+<section1 topic='Introduction' anchor='introduction'>
+  <p>When offering a Jingle session, it can be helpful to provide a small preview of the offered content to help the session responder decide whether to accept or reject the session.</p>  
+  <p>This is particularly useful for file transfer content (especially image files), but can also be used for things such as video (e.g. using a still frame from the stream as the preview thumbnail), and even audio by using a small image of album cover art.</p>
+</section1>
+<section1 topic='Requirements' anchor='requirements'>
+  <p>This documents defines a way to include a thumbnail image as an additional metadata in a Jingle content description.</p>
+</section1>
+<section1 topic='Use Cases' anchor='usecase'>
+  <p>When a client wishes to supply a thumbnail in a content offer, it can do so by including an extra &lt;thumbnail/&gt; element as shown in the following example:</p>
+  <example caption='Inclusion of a thumbnail in a Jingle file transfer offer'><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='nzu25s8'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:0'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='851ba2'>
+    <content creator='initiator' name='a-file-offer'>
+      <description xmlns='urn:xmpp:jingle:apps:file-transfer:4' senders='initiator'>
+        <file>
+          <media-type>image/jpeg</media>
+          <name>image.jpg</name>
+          <size>3032449</size>
+          <hash xmlns='urn:xmpp:hashes:1' algo='sha-1'>552da749930852c69ae5d2141d3766b1</hash>
+          <desc>This is a test. If this were a real file...</desc>
+          <thumbnail xmlns='urn:xmpp:thumbs:1'
+                     uri='cid:sha1+ffd7c8d28e9c5e82afea41f97108c6b4@bob.xmpp.org'
+                     media-type='image/png'
+                     width='128'
+                     height='96'/>
+        </file>
+      </description>
+      <transport .../>
+    </content>
+  </jingle>
+</iq>]]></example>
+
+  <p>Thumbnails MAY be included for Jingle content other than file transfer. For example, with Jingle RTP video a thumbnail could be included to show who is calling (either by capturing a still frame from the input stream or by using an existing profile image):</p>
+  <example caption='Inclusion of a thumbnail in a Jingle RTP video session'><![CDATA[
+<iq from='romeo@montague.lit/orchard'
+    id='ih28sx61'
+    to='juliet@capulet.lit/balcony'
+    type='set'>
+  <jingle xmlns='urn:xmpp:jingle:1'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='a73sjjvkla37jfea'>
+    <content creator='initiator' name='webcam'>
+      <description xmlns='urn:xmpp:jingle:apps:rtp:1' media='video'>
+        <payload-type id='98' name='theora' clockrate='90000'>
+          <parameter name='height' value='600'/>
+          <parameter name='width' value='800'/>
+          <parameter name='delivery-method' value='inline'/>
+          <parameter name='configuration' value='somebase16string'/>
+          <parameter name='sampling' value='YCbCr-4:2:2'/>
+        </payload-type>
+        <payload-type id='28' name='nv' clockrate='90000'/>
+        <payload-type id='25' name='CelB' clockrate='90000'/>
+        <payload-type id='32' name='MPV' clockrate='90000'/>
+        <bandwidth type='AS'>128</bandwidth>
+        <thumbnail xmlns='urn:xmpp:thumbs:1'
+                   uri='cid:sha1+ffd7c8d28e9c5e82afea41f97108c6b4@bob.xmpp.org'
+                   media-type='image/png'
+                   width='128'
+                   height='96'/>
+      </description>
+      <transport .../>
+    </content>
+  </jingle>
+</iq>]]></example>
+
+  <p>Multiple &lt;thumbnail/&gt; elements MAY be included to provide thumbnails of different sizes, media types, or URIs.</p>
+
+  <p>If the provided URI has the scheme 'cid', then the thumbnail data MAY be requested using &xep0231;.</p>
+</section1>
+
+<section1 topic='Definition of the thumbnail Element' anchor='thumbnail_element'>
+  <p>The following attributes are defined for the &lt;thumbnail/&gt; element.</p>
+  <table caption='Attributes of the thumbnail Element'>
+    <tr>
+      <th>Attribute</th>
+      <th>Description</th>
+      <th>Inclusion</th>
+    </tr>
+    <tr>
+      <td>uri</td>
+      <td>A URI where the thumbnail data can be accessed (typically by using a URI scheme of 'cid:', 'https:', or 'http:'). If the URI scheme is 'cid:' then the identifier MUST refer to a bit of binary data as described in &xep0231;</td>
+      <td>REQUIRED</td>
+    </tr>
+    <tr>
+      <td>media-type</td>
+      <td>The value of the 'media-type' attribute MUST match the syntax specified in &rfc2045;. That is, the value MUST include a top-level media type, the "/" character, and a subtype; in addition, it MAY include one or more optional parameters. The "type/subtype" string SHOULD be registered in the &ianamedia;, but MAY be an unregistered or yet-to-be-registered value.</td>
+      <td>RECOMMENDED</td>
+    </tr>
+    <tr>
+      <td>width</td>
+      <td>The intended display width of the thumbnail image. Used as a hint for the receiving client to prepare the appropriate UI, such as a dialog window.</td>
+      <td>OPTIONAL</td>
+    </tr>
+    <tr>
+      <td>height</td>
+      <td>The intended display height of the thumbnail image. Used as a hint for the receiving client to prepare the appropriate UI, such as a dialog window.</td>
+      <td>OPTIONAL</td>
+    </tr>
+  </table>
+</section1>
+<section1 topic='Security Considerations' anchor='security'>
+  <p>The inclusion of an image thumbnail may leak information about a transfer
+otherwise taking place on an e2e encrypted file transfer stream. A client MAY
+wish to not include a thumbnail.</p>
+  <p>A client MUST NOT rely on the values specified for the width and height of a thumbnail to allocate a bitmap data buffer for the thumbnail, to prevent possible DoS attacks. Also a client SHOULD apply implementation-specific limits on the thumbnails, if using these values to pepare a UI element for the thumbnail image, e.g. with dimensions of 128x128 pixels, values exceeding these would then be truncated and the thumbnail image scaled down when received.</p>
+</section1>
+<section1 topic='IANA Considerations' anchor='iana'>
+  <p>This document requires no interaction with &IANA;.</p>
+</section1>
+<section1 topic='XMPP Registrar Considerations' anchor='registrar'>
+  <section2 topic='Protocol Namespaces' anchor='registrar-ns'>
+    <p>This specification defines the following XML namespace:</p>
+    <ul>
+      <li>urn:xmpp:thumbs:1</li>
+    </ul>
+    <p>The &REGISTRAR; includes this namespace in the registry located at &NAMESPACES;, as described in Section 4 of &xep0053;.</p>
+  </section2>
+  <section2 topic='Protocol Versioning' anchor='registrar-versioning'>
+    &NSVER;
+  </section2>
+</section1>
+<section1 topic='XML Schema' anchor='schema'>
+  <code><![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+
+<xs:schema
+    xmlns:xs='http://www.w3.org/2001/XMLSchema'
+    targetNamespace='urn:xmpp:thumbs:0'
+    xmlns='urn:xmpp:thumbs:0'
+    elementFormDefault='qualified'>
+
+  <xs:annotation>
+    <xs:documentation>
+      The protocol documented by this schema is defined in
+      xxx
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name='thumbnail'>
+    <xs:complexType>
+      <xs:attribute name='uri' type='xs:anyURI' use='required'/>
+      <xs:attribute name='media-type' type='xs:string' use='optional'/>
+      <xs:attribute name='width' type='xs:integer' use='optional'/>
+      <xs:attribute name='height' type='xs:integer' use='optional'/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+  ]]></code>
+</section1>
+</xep>

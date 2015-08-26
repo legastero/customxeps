@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>XEP-0264: Jingle Content Thumbnails</title><link rel="stylesheet" type="text/css" href="../xmpp.css" /><link href="../prettify.css" type="text/css" rel="stylesheet" /><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" /><script type="text/javascript" src="../prettify.js"></script><meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=2.0" /><meta name="DC.Title" content="Jingle Content Thumbnails" /><meta name="DC.Creator" content="Marcus Lundblad" /><meta name="DC.Creator" content="Lance Stout" /><meta name="DC.Description" content="This specification defines a way for a client to supply a preview image for Jingle content." /><meta name="DC.Publisher" content="XMPP Standards Foundation" /><meta name="DC.Contributor" content="XMPP Extensions Editor" /><meta name="DC.Date" content="2015-08-26" /><meta name="DC.Type" content="XMPP Extension Protocol" /><meta name="DC.Format" content="XHTML" /><meta name="DC.Identifier" content="XEP-0264" /><meta name="DC.Language" content="en" /><meta name="DC.Rights" content="This XMPP Extension Protocol is copyright &#xA9; 1999 - 2014 by the XMPP Standards Foundation (XSF)." /></head><body onload="prettyPrint()"><h1>XEP-0264: Jingle Content Thumbnails</h1><table><tr valign="top"><td><strong>Abstract:</strong></td><td>This specification defines a way for a client to supply a preview image for Jingle content.</td></tr><tr valign="top"><td><strong>Authors:</strong></td><td>Marcus Lundblad, Lance Stout</td></tr><tr valign="top"><td><strong>Copyright:</strong></td><td>© 1999 - 2014 XMPP Standards Foundation. <a href="#appendix-legal">SEE LEGAL NOTICES</a>.</td></tr><tr valign="top"><td><strong>Status:</strong></td><td>Experimental</td></tr><tr valign="top"><td><strong>Type:</strong></td><td>Standards Track</td></tr><tr valign="top"><td><strong>Version:</strong></td><td>0.4</td></tr><tr valign="top"><td><strong>Last Updated:</strong></td><td>2015-08-26</td></tr></table><hr /><p style="color:red">WARNING: This Standards-Track document is Experimental. Publication as an XMPP Extension Protocol does not imply approval of this proposal by the XMPP Standards Foundation. Implementation of the protocol described herein is encouraged in exploratory implementations, but production systems are advised to carefully consider whether it is appropriate to deploy implementations of this protocol before it advances to a status of Draft.</p><hr /><h2>Table of Contents</h2><div class="indent"><p><br />1.  <a href="#introduction">Introduction</a><br />2.  <a href="#requirements">Requirements</a><br />3.  <a href="#usecase">Use Cases</a><br />4.  <a href="#thumbnail_element">Definition of the thumbnail Element</a><br />5.  <a href="#security">Security Considerations</a><br />6.  <a href="#iana">IANA Considerations</a><br />7.  <a href="#registrar">XMPP Registrar Considerations</a><br />   
+      7.1.  <a href="#registrar-ns">Protocol Namespaces</a><br />   
+      7.2.  <a href="#registrar-versioning">Protocol Versioning</a><br />8.  <a href="#schema">XML Schema</a></p><p><a href="#appendices">Appendices</a><br />    <a href="#appendix-docinfo">A: Document Information</a><br />    <a href="#appendix-authorinfo">B: Author Information</a><br />    <a href="#appendix-legal">C: Legal Notices</a><br />    <a href="#appendix-xmpp">D: Relation to XMPP</a><br />    <a href="#appendix-discuss">E: Discussion Venue</a><br />    <a href="#appendix-conformance">F: Requirements Conformance</a><br />    <a href="#appendix-notes">G: Notes</a><br />    <a href="#appendix-revs">H: Revision History</a></p></div><hr /><h2>1.
+       <a name="introduction" id="introduction">Introduction</a></h2>
+  <p class="" style="">When offering a Jingle session, it can be helpful to provide a small preview of the offered content to help the session responder decide whether to accept or reject the session.</p>  
+  <p class="" style="">This is particularly useful for file transfer content (especially image files), but can also be used for things such as video (e.g. using a still frame from the stream as the preview thumbnail), and even audio by using a small image of album cover art.</p>
+<h2>2.
+       <a name="requirements" id="requirements">Requirements</a></h2>
+  <p class="" style="">This documents defines a way to include a thumbnail image as an additional metadata in a Jingle content description.</p>
+<h2>3.
+       <a name="usecase" id="usecase">Use Cases</a></h2>
+  <p class="" style="">When a client wishes to supply a thumbnail in a content offer, it can do so by including an extra &lt;thumbnail/&gt; element as shown in the following example:</p>
+  <p class="caption"><a name="example-1" id="example-1"></a>Example 1. Inclusion of a thumbnail in a Jingle file transfer offer</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='romeo@montague.lit/orchard'
+    id='nzu25s8'
+    to='juliet@capulet.lit/balcony'
+    type='set'&gt;
+  &lt;jingle xmlns='urn:xmpp:jingle:0'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='851ba2'&gt;
+    &lt;content creator='initiator' name='a-file-offer'&gt;
+      &lt;description xmlns='urn:xmpp:jingle:apps:file-transfer:4' senders='initiator'&gt;
+        &lt;file&gt;
+          &lt;media-type&gt;image/jpeg&lt;/media&gt;
+          &lt;name&gt;image.jpg&lt;/name&gt;
+          &lt;size&gt;3032449&lt;/size&gt;
+          &lt;hash xmlns='urn:xmpp:hashes:1' algo='sha-1'&gt;552da749930852c69ae5d2141d3766b1&lt;/hash&gt;
+          &lt;desc&gt;This is a test. If this were a real file...&lt;/desc&gt;
+          &lt;thumbnail xmlns='urn:xmpp:thumbs:1'
+                     uri='cid:sha1+ffd7c8d28e9c5e82afea41f97108c6b4@bob.xmpp.org'
+                     media-type='image/png'
+                     width='128'
+                     height='96'/&gt;
+        &lt;/file&gt;
+      &lt;/description&gt;
+      &lt;transport .../&gt;
+    &lt;/content&gt;
+  &lt;/jingle&gt;
+&lt;/iq&gt;</pre></div>
+
+  <p class="" style="">Thumbnails MAY be included for Jingle content other than file transfer. For example, with Jingle RTP video a thumbnail could be included to show who is calling (either by capturing a still frame from the input stream or by using an existing profile image):</p>
+  <p class="caption"><a name="example-2" id="example-2"></a>Example 2. Inclusion of a thumbnail in a Jingle RTP video session</p><div class="indent"><pre class="prettyprint">
+&lt;iq from='romeo@montague.lit/orchard'
+    id='ih28sx61'
+    to='juliet@capulet.lit/balcony'
+    type='set'&gt;
+  &lt;jingle xmlns='urn:xmpp:jingle:1'
+          action='session-initiate'
+          initiator='romeo@montague.lit/orchard'
+          sid='a73sjjvkla37jfea'&gt;
+    &lt;content creator='initiator' name='webcam'&gt;
+      &lt;description xmlns='urn:xmpp:jingle:apps:rtp:1' media='video'&gt;
+        &lt;payload-type id='98' name='theora' clockrate='90000'&gt;
+          &lt;parameter name='height' value='600'/&gt;
+          &lt;parameter name='width' value='800'/&gt;
+          &lt;parameter name='delivery-method' value='inline'/&gt;
+          &lt;parameter name='configuration' value='somebase16string'/&gt;
+          &lt;parameter name='sampling' value='YCbCr-4:2:2'/&gt;
+        &lt;/payload-type&gt;
+        &lt;payload-type id='28' name='nv' clockrate='90000'/&gt;
+        &lt;payload-type id='25' name='CelB' clockrate='90000'/&gt;
+        &lt;payload-type id='32' name='MPV' clockrate='90000'/&gt;
+        &lt;bandwidth type='AS'&gt;128&lt;/bandwidth&gt;
+        &lt;thumbnail xmlns='urn:xmpp:thumbs:1'
+                   uri='cid:sha1+ffd7c8d28e9c5e82afea41f97108c6b4@bob.xmpp.org'
+                   media-type='image/png'
+                   width='128'
+                   height='96'/&gt;
+      &lt;/description&gt;
+      &lt;transport .../&gt;
+    &lt;/content&gt;
+  &lt;/jingle&gt;
+&lt;/iq&gt;</pre></div>
+
+  <p class="" style="">Multiple &lt;thumbnail/&gt; elements MAY be included to provide thumbnails of different sizes, media types, or URIs.</p>
+
+  <p class="" style="">If the provided URI has the scheme 'cid', then the thumbnail data MAY be requested using <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0231.html">Bits of Binary (XEP-0231)</a></span>  [<a href="#nt-idm114220236464">1</a>].</p>
+<h2>4.
+       <a name="thumbnail_element" id="thumbnail_element">Definition of the thumbnail Element</a></h2>
+  <p class="" style="">The following attributes are defined for the &lt;thumbnail/&gt; element.</p>
+  <div class="indent"><p class="caption"><a name="table-1" id="table-1"></a>Table 1: Attributes of the thumbnail Element</p><table border="1" cellpadding="3" cellspacing="0">
+    <tr class="body">
+      <th colspan="" rowspan="">Attribute</th>
+      <th colspan="" rowspan="">Description</th>
+      <th colspan="" rowspan="">Inclusion</th>
+    </tr>
+    <tr class="body">
+      <td colspan="" rowspan="">uri</td>
+      <td colspan="" rowspan="">A URI where the thumbnail data can be accessed (typically by using a URI scheme of 'cid:', 'https:', or 'http:'). If the URI scheme is 'cid:' then the identifier MUST refer to a bit of binary data as described in <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0231.html">Bits of Binary (XEP-0231)</a></span>  [<a href="#nt-idm114220238240">2</a>]</td>
+      <td colspan="" rowspan="">REQUIRED</td>
+    </tr>
+    <tr class="body">
+      <td colspan="" rowspan="">media-type</td>
+      <td colspan="" rowspan="">The value of the 'media-type' attribute MUST match the syntax specified in <span class="ref" style=""><a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a></span>  [<a href="#nt-idm114220219360">3</a>]. That is, the value MUST include a top-level media type, the "/" character, and a subtype; in addition, it MAY include one or more optional parameters. The "type/subtype" string SHOULD be registered in the <span class="ref" style=""><a href="http://www.iana.org/assignments/media-types">IANA MIME Media Types Registry</a></span>  [<a href="#nt-idm114220214288">4</a>], but MAY be an unregistered or yet-to-be-registered value.</td>
+      <td colspan="" rowspan="">RECOMMENDED</td>
+    </tr>
+    <tr class="body">
+      <td colspan="" rowspan="">width</td>
+      <td colspan="" rowspan="">The intended display width of the thumbnail image. Used as a hint for the receiving client to prepare the appropriate UI, such as a dialog window.</td>
+      <td colspan="" rowspan="">OPTIONAL</td>
+    </tr>
+    <tr class="body">
+      <td colspan="" rowspan="">height</td>
+      <td colspan="" rowspan="">The intended display height of the thumbnail image. Used as a hint for the receiving client to prepare the appropriate UI, such as a dialog window.</td>
+      <td colspan="" rowspan="">OPTIONAL</td>
+    </tr>
+  </table></div>
+<h2>5.
+       <a name="security" id="security">Security Considerations</a></h2>
+  <p class="" style="">The inclusion of an image thumbnail may leak information about a transfer
+otherwise taking place on an e2e encrypted file transfer stream. A client MAY
+wish to not include a thumbnail.</p>
+  <p class="" style="">A client MUST NOT rely on the values specified for the width and height of a thumbnail to allocate a bitmap data buffer for the thumbnail, to prevent possible DoS attacks. Also a client SHOULD apply implementation-specific limits on the thumbnails, if using these values to pepare a UI element for the thumbnail image, e.g. with dimensions of 128x128 pixels, values exceeding these would then be truncated and the thumbnail image scaled down when received.</p>
+<h2>6.
+       <a name="iana" id="iana">IANA Considerations</a></h2>
+  <p class="" style="">This document requires no interaction with the <span class="ref" style=""><a href="http://www.iana.org/">Internet Assigned Numbers Authority (IANA)</a></span>  [<a href="#nt-idm114220197376">5</a>].</p>
+<h2>7.
+       <a name="registrar" id="registrar">XMPP Registrar Considerations</a></h2>
+  <div class="indent"><h3>7.1 <a name="registrar-ns" id="registrar-ns">Protocol Namespaces</a></h3>
+    <p class="" style="">This specification defines the following XML namespace:</p>
+    <ul class="" style="">
+      <li class="" style="">urn:xmpp:thumbs:1</li>
+    </ul>
+    <p class="" style="">The <span class="ref" style=""><a href="http://xmpp.org/registrar/">XMPP Registrar</a></span>  [<a href="#nt-idm114220187472">6</a>] includes this namespace in the registry located at &lt;<a href="http://xmpp.org/registrar/namespaces.html">http://xmpp.org/registrar/namespaces.html</a>&gt;, as described in Section 4 of <span class="ref" style=""><a href="http://xmpp.org/extensions/xep-0053.html">XMPP Registrar Function (XEP-0053)</a></span>  [<a href="#nt-idm114220180736">7</a>].</p>
+  </div>
+  <div class="indent"><h3>7.2 <a name="registrar-versioning" id="registrar-versioning">Protocol Versioning</a></h3>
+    <p class="" style="">If the protocol defined in this specification undergoes a revision that is not fully backwards-compatible with an older version, the XMPP Registrar shall increment the protocol version number found at the end of the XML namespaces defined herein, as described in Section 4 of <span class="ref">XEP-0053</span>.</p>
+  </div>
+<h2>8.
+       <a name="schema" id="schema">XML Schema</a></h2>
+  <p class="caption"></p><div class="indent"><pre class="prettyprint">
+&lt;?xml version='1.0' encoding='UTF-8'?&gt;
+
+&lt;xs:schema
+    xmlns:xs='http://www.w3.org/2001/XMLSchema'
+    targetNamespace='urn:xmpp:thumbs:0'
+    xmlns='urn:xmpp:thumbs:0'
+    elementFormDefault='qualified'&gt;
+
+  &lt;xs:annotation&gt;
+    &lt;xs:documentation&gt;
+      The protocol documented by this schema is defined in
+      xxx
+    &lt;/xs:documentation&gt;
+  &lt;/xs:annotation&gt;
+
+  &lt;xs:element name='thumbnail'&gt;
+    &lt;xs:complexType&gt;
+      &lt;xs:attribute name='uri' type='xs:anyURI' use='required'/&gt;
+      &lt;xs:attribute name='media-type' type='xs:string' use='optional'/&gt;
+      &lt;xs:attribute name='width' type='xs:integer' use='optional'/&gt;
+      &lt;xs:attribute name='height' type='xs:integer' use='optional'/&gt;
+    &lt;/xs:complexType&gt;
+  &lt;/xs:element&gt;
+&lt;/xs:schema&gt;
+  </pre></div>
+<hr /><a name="appendices" id="appendices"></a><h2>Appendices</h2><hr /><a name="appendix-docinfo" id="appendix-docinfo"></a><h3>Appendix A: Document Information</h3><p class="indent">
+            Series: <a href="http://xmpp.org/extensions/">XEP</a><br />
+            Number: 0264<br />
+            Publisher: <a href="/xsf/">XMPP Standards Foundation</a><br />
+            Status: 
+            <a href="http://xmpp.org/extensions/xep-0001.html#states-Experimental">Experimental</a><br />
+            Type:
+            <a href="http://xmpp.org/extensions/xep-0001.html#types-Standards Track">Standards Track</a><br />
+            Version: 0.4<br />
+            Last Updated: 2015-08-26<br />
+                Approving Body: <a href="http://xmpp.org/council/">XMPP Council</a><br />Dependencies: XMPP Core, XEP-0096, XEP-0231<br />
+                Supersedes: None<br />
+                Superseded By: None<br />
+            Short Name: thumbs<br />
+              Source Control: 
+                <a class="standardsButton" href="http://gitorious.org/xmpp/xmpp/blobs/master/extensions/xep-0264.xml">HTML</a><br />
+            This document in other formats: 
+                <a class="standardsButton" href="http://xmpp.org/extensions/xep-0264.xml">XML</a> 
+                <a class="standardsButton" href="http://xmpp.org/extensions/xep-0264.pdf">PDF</a></p><hr /><a name="appendix-authorinfo" id="appendix-authorinfo"></a><h3>Appendix B: Author Information</h3><div class="indent"><h3>Marcus Lundblad</h3><p class="indent">
+        Email:
+        <a href="mailto:ml@update.uu.se">ml@update.uu.se</a><br />
+        JabberID: 
+        <a href="xmpp:mlundblad@jabber.org">mlundblad@jabber.org</a><br /></p><h3>Lance Stout</h3><p class="indent">
+        Email:
+        <a href="mailto:lance@andyet.com">lance@andyet.com</a><br />
+        JabberID: 
+        <a href="xmpp:lance@lance.im">lance@lance.im</a><br /></p></div><hr /><a name="appendix-legal" id="appendix-legal"></a><h3>Appendix C: Legal Notices</h3><div class="indent"><h4>Copyright</h4>This XMPP Extension Protocol is copyright © 1999 - 2014 by the <a href="http://xmpp.org/">XMPP Standards Foundation</a> (XSF).<h4>Permissions</h4>Permission is hereby granted, free of charge, to any person obtaining a copy of this specification (the "Specification"), to make use of the Specification without restriction, including without limitation the rights to implement the Specification in a software program, deploy the Specification in a network service, and copy, modify, merge, publish, translate, distribute, sublicense, or sell copies of the Specification, and to permit persons to whom the Specification is furnished to do so, subject to the condition that the foregoing copyright notice and this permission notice shall be included in all copies or substantial portions of the Specification. Unless separate permission is granted, modified works that are redistributed shall not contain misleading information regarding the authors, title, number, or publisher of the Specification, and shall not claim endorsement of the modified works by the authors, any organization or project to which the authors belong, or the XMPP Standards Foundation.<h4>Disclaimer of Warranty</h4><span style="font-weight: bold">## NOTE WELL: This Specification is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. ##</span><h4>Limitation of Liability</h4>In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall the XMPP Standards Foundation or any author of this Specification be liable for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising from, out of, or in connection with the Specification or the implementation, deployment, or other use of the Specification (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if the XMPP Standards Foundation or such author has been advised of the possibility of such damages.<h4>IPR Conformance</h4>This XMPP Extension Protocol has been contributed in full conformance with the XSF's Intellectual Property Rights Policy (a copy of which can be found at &lt;<a href="http://xmpp.org/about-xmpp/xsf/xsf-ipr-policy/">http://xmpp.org/about-xmpp/xsf/xsf-ipr-policy/</a>&gt; or obtained by writing to XMPP Standards Foundation, 1899 Wynkoop Street, Suite 600, Denver, CO 80202 USA).</div><hr /><a name="appendix-xmpp" id="appendix-xmpp"></a><h3>Appendix D: Relation to XMPP</h3><p class="indent">The Extensible Messaging and Presence Protocol (XMPP) is defined in the XMPP Core (RFC 6120) and XMPP IM (RFC 6121) specifications contributed by the XMPP Standards Foundation to the Internet Standards Process, which is managed by the Internet Engineering Task Force in accordance with RFC 2026. Any protocol defined in this document has been developed outside the Internet Standards Process and is to be understood as an extension to XMPP rather than as an evolution, development, or modification of XMPP itself.</p><hr /><a name="appendix-discuss" id="appendix-discuss"></a><h3>Appendix E: Discussion Venue</h3><p class="indent">The primary venue for discussion of XMPP Extension Protocols is the &lt;<a href="http://mail.jabber.org/mailman/listinfo/standards">standards@xmpp.org</a>&gt; discussion list.</p><p class="indent">Discussion on other xmpp.org discussion lists might also be appropriate; see &lt;<a href="http://xmpp.org/about/discuss.shtml">http://xmpp.org/about/discuss.shtml</a>&gt; for a complete list.</p><p class="indent">Errata can be sent to &lt;<a href="mailto:editor@xmpp.org">editor@xmpp.org</a>&gt;.</p><hr /><a name="appendix-conformance" id="appendix-conformance"></a><h3>Appendix F: Requirements Conformance</h3><p class="indent">The following requirements keywords as used in this document are to be interpreted as described in <a href="http://www.ietf.org/rfc/rfc2119.txt">RFC 2119</a>: "MUST", "SHALL", "REQUIRED"; "MUST NOT", "SHALL NOT"; "SHOULD", "RECOMMENDED"; "SHOULD NOT", "NOT RECOMMENDED"; "MAY", "OPTIONAL".</p><hr /><a name="appendix-notes" id="appendix-notes"></a><h3>Appendix G: Notes</h3><div class="indent"><p><a name="nt-idm114220236464" id="nt-idm114220236464">1</a>. XEP-0231: Bits of Binary &lt;<a href="http://xmpp.org/extensions/xep-0231.html">http://xmpp.org/extensions/xep-0231.html</a>&gt;.</p><p><a name="nt-idm114220238240" id="nt-idm114220238240">2</a>. XEP-0231: Bits of Binary &lt;<a href="http://xmpp.org/extensions/xep-0231.html">http://xmpp.org/extensions/xep-0231.html</a>&gt;.</p><p><a name="nt-idm114220219360" id="nt-idm114220219360">3</a>. RFC 2045: Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies &lt;<a href="http://tools.ietf.org/html/rfc2045">http://tools.ietf.org/html/rfc2045</a>&gt;.</p><p><a name="nt-idm114220214288" id="nt-idm114220214288">4</a>. IANA registry of MIME media types &lt;<a href="http://www.iana.org/assignments/media-types">http://www.iana.org/assignments/media-types</a>&gt;.</p><p><a name="nt-idm114220197376" id="nt-idm114220197376">5</a>. The Internet Assigned Numbers Authority (IANA) is the central coordinator for the assignment of unique parameter values for Internet protocols, such as port numbers and URI schemes. For further information, see &lt;<a href="http://www.iana.org/">http://www.iana.org/</a>&gt;.</p><p><a name="nt-idm114220187472" id="nt-idm114220187472">6</a>. The XMPP Registrar maintains a list of reserved protocol namespaces as well as registries of parameters used in the context of XMPP extension protocols approved by the XMPP Standards Foundation. For further information, see &lt;<a href="http://xmpp.org/registrar/">http://xmpp.org/registrar/</a>&gt;.</p><p><a name="nt-idm114220180736" id="nt-idm114220180736">7</a>. XEP-0053: XMPP Registrar Function &lt;<a href="http://xmpp.org/extensions/xep-0053.html">http://xmpp.org/extensions/xep-0053.html</a>&gt;.</p></div><hr /><a name="appendix-revs" id="appendix-revs"></a><h3>Appendix H: Revision History</h3><p>Note: Older versions of this specification might be available at <a href="http://xmpp.org/extensions/attic/">http://xmpp.org/extensions/attic/</a></p><div class="indent"><h4>Version 0.4 (2015-08-26)</h4><div class="indent">
+      <p class="" style="">Changed format to use generic 'uri' attribute to allow for 'https:' and 'http:' URIs in addition to BoB 'cid:' URIs.</p>
+      <p class="" style="">Indicated that multiple thumbnails may be present.</p>
+      <p class="" style="">Expanded scope of use cases to be Jingle content in general, not just file transfer.</p>
+     (ljts)
+    </div><h4>Version 0.3 (2009-04-27)</h4><div class="indent"><p class="" style="">Fixed typo in author's name :).</p> (ml)
+    </div><h4>Version 0.2 (2009-04-06)</h4><div class="indent"><p class="" style="">Add paragraph in security section about protecting against malicious thumbnail dimensions in offer. Fixed a typo.</p> (ml)
+    </div><h4>Version 0.1 (2009-04-02)</h4><div class="indent"><p class="" style="">Initial published version.</p> (psa)
+    </div><h4>Version 0.0.3 (2009-03-10)</h4><div class="indent"><p class="" style="">Split use-case section into "Introduction", "Requirements", and "Use case".</p>
+     (ml)
+    </div><h4>Version 0.0.2 (2009-02-25)</h4><div class="indent"><p class="" style="">Removed service disovery.
+Added missing namespace on thumnail elements.</p>
+     (ml)
+    </div><h4>Version 0.0.1 (2009-02-23)</h4><div class="indent"><p class="" style="">First draft.</p> (ml)
+    </div></div><hr /><p>END</p></body></html>
