@@ -30,7 +30,14 @@
     <initials>ls/psa</initials>
     <remark>
       <ul>
-        <li>Made various fixes that Lance hasn't described here yet. :-)</li>
+        <li>Recast the document to match the registration procedure defined by XEP-0166 for new application types.</li>
+        <li>Explicitly defined the schema of the &lt;file/&gt; element instead of referencing XEP-0096.</li>
+        <li>Defined the use of a 'length' attribute on &lt;range/&gt; elements. This attribute was always there because the &lt;file/&gt; and &lt;range/&gt; elements had been defined as the same as the parallel elements in XEP-0096, but the 'length' attribute was not explicitly referenced in this document.</li>
+        <li>Clarified the need for the 'senders' attribute on Jingle &lt;content/&gt; elements to distinguish between File Offers and File Requests.</li>
+        <li>Added the &lt;file-not-found/&gt; and &lt;file-too-large/&gt; reason types.</li>
+        <li>Clarified how to abort a file transfer via 'content-remove' or 'session-terminate' actions.</li>
+        <li>Added &lt;received/&gt; element for indicating that a transfer was successful, particularly when there are multiple transfers.</li>
+        <li>Added SDP mapping.</li>
       </ul>
     </remark>
   </revision>
@@ -338,6 +345,7 @@
     </tr>
   </table>
   <p>One or more &lt;hash/&gt; elements MUST be present when offering a file, but those elements MAY be empty if the hash has not yet been computed. If there is no computed hash value, the &lt;hash/&gt; element(s) MUST possess an 'algo' attribute specifying which hash algorithm will be used. Once a hash has been calculated by the File Sender, the File Sender SHOULD inform the File Receiver of the hash value as described in <link url='#checksum'>Checksum</link>.</p>
+  <p>Additional elements MAY be included as children of the &lt;file/&gt; element to provide additional metadata about the file, such as &xep0264;.</p>
   <p>The optional &lt;range/&gt; element MAY possess two attributes:</p>
   <table caption='Range Element Attributes'>
     <tr>
@@ -918,7 +926,7 @@ a=file-range:1024-*]]></code>
 
 <section1 topic='Security Considerations' anchor='security'>
     <p>Caution needs to be exercised when using the &lt;name/&gt; of a file offer or request to control any interaction with a file system. For example, a malicious user could request a file with &lt;name&gt;/etc/passwd&lt;/name&gt; or include file system specific control patterns such as &lt;name&gt;../../private.txt&lt;/name&gt; to try and access a sensitive file outside of the set of files intended to be shared. Or a malicious user could offer a file named "/etc/passwd" to try and trick the receiver into overwriting that or other sensitive files. Therefore, implementations SHOULD escape any file system path separators in the &lt;name/&gt; before using that value in any file system calls.</p>
-  <p>It is RECOMMENDED for implementations to use the strongest hashing algorithm available to both parties. See XEP-0300 for further discussion.</p>
+  <p>It is RECOMMENDED for implementations to use the strongest hashing algorithm available to both parties. See <cite>XEP-0300</cite> for further discussion.</p>
   <p>In order to secure the data stream, implementations SHOULD use encryption methods appropriate to the transport method being used. For example, end-to-end encryption can be negotiated over either SOCKS5 Bytestreams or In-Band Bytestreams as described in <cite>XEP-0260</cite> and <cite>XEP-0261</cite>.</p>
   <p>Refer to <cite>XEP-0047</cite>, <cite>XEP-0065</cite>, <cite>XEP-0096</cite>, <cite>XEP-0176</cite>, <cite>XEP-0260</cite>, <cite>XEP-0261</cite>, and <cite>RFC 6455</cite> for related security considerations.</p>
 </section1>
