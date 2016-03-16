@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE xep SYSTEM 'xep.dtd' [
+<!ENTITY % ents SYSTEM 'xep.ent'>%ents;]>
+<?xml-stylesheet type='text/xsl' href='xep.xsl'?>
+<xep>
+    <header>
+        <title>Custom Emoji Sharing</title>
+        <abstract>This specification defines a way to share a catalog of text patterns that can be converted to a shared set of Emoji images.</abstract>
+        &LEGALNOTICE;
+        <number>XXXX</number>
+        <status>ProtoXEP</status>
+        <type>Standards Track</type>
+        <sig>Standards</sig>
+        <dependencies>
+            <spec>XMPP Core</spec>
+            <spec>XMPP IM</spec>
+            <spec>XEP-0030</spec>
+        </dependencies>
+        <supersedes/>
+        <supersededby/>
+        <shortname>NOT_YET_ASSIGNED</shortname>
+        <author>
+            <firstname>Lance</firstname>
+            <surname>Stout</surname>
+            <email>lance@lance.im</email>
+            <jid>lance@lance.im</jid>
+        </author>
+        <revision>
+            <version>0.0.1</version>
+            <date>2016-04-15</date>
+            <initials>lance</initials>
+            <remark>
+                <p>Initial version.</p>
+            </remark>
+        </revision>
+    </header>
+    <section1 topic='Introduction' anchor='intro'>
+        <p>Instant messaging has long had a concept of "smilies" or "emoticons", where short phrases of text are replaced by a custom image. Typically, these have been patterns such as ":-)" or ":)", but the total collection of such patterns used by a client has historically been hard coded into implementations. Some clients have supported users changing the images associated with those phrases (usually via plugins providing emoticon "packs"), and &xep0231; allowed those customized images to be shared via &xep0071; in converations, even when the other participants did not use the same images locally.</p>
+        <p>Since those early days of "smilies" and "emoticons", the Unicode standard has adopted emoji characters which perform similar purposes. However, while more emoji are being added to Unicode with each new version, the typical pattern for applications supporting emoji is to allow users to specify textual patterns that will be replaced with custom images. These are usually phrases which are easier to both remember and type using familiar keyboards without having to rely on a menu picker to select the appropriate glyph.</p>
+        <p>While &xep0231; allows different client implementations to share the images they use, there is no mechanism for sharing the mapping of text patterns to images.</p>
+        <p>Having a common mapping even between different client implementations and versions is beneficial in shared contexts, such as MUC rooms. For cases where clients sending messages might not support &xep0071;, the shared catalog of phrases for the given conversation context can be used to insert images based on the plaintext message.</p>
+        <p>This document describes the use of a catalog mechanism for exchanging text patterns and associated image URIs inside of a conversation context, and is primarily envisioned for use inside of MUC rooms.</p>
+    </section1>
+    <section1 topic='Protocol' anchor='protocol'>
+        <p>The emoji catalog is contained by a &lt;catalog /&gt; element qualified by the 'urn:xmpp:emoji:0' namespace. The &lt;catalog /&gt; element MAY include one or more &lt;emoji /&gt; elements which define the mappings between text patterns and image URIs.</p>
+        <p>The &lt;emoji /&gt; MUST include a 'pattern' attribute which contains the exact text which will be replaced with an image, and also MUST include a 'uri' attribute for the image's URI.</p>
+        <p>Optionally, 'width' and 'height' attributes MAY be included in the &lt;emoji/&gt; element, specifying the width and height of the image in pixels.</p>
+        <p>Each &lt;emoji /&gt; element MAY include one or more &lt;alias/&gt; elements whose text content are additional patterns that can be matched with the same image URI.</p>
+        <example caption='A sample emoji catalog'><![CDATA[
+<catalog xmlns="urn:xmpp:emoji:0">
+  <emoji pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org">
+    <alias>:thumbsup:</alias>
+  </emoji>
+  <emoji pattern=":-1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
+  <emoji pattern=":sticker:"
+         uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org"
+         width="50"
+         height="50" />
+</catalog>]]></example>
+    </section1>
+    <section1 topic='Use Cases' anchor='use-cases'>
+        <section2 topic='Discovering Support'>
+            <p>If an entity supports providing a catalog of custom emoji mappings, it MUST specify the 'urn:xmpp:emoji:0' feature in its service discovery information features as specified in &xep0030; and the Entity Capabilities profile specified in &xep0115;.</p>
+            <example caption='Client checks for emoji catalog support by a MUC room'><![CDATA[
+<iq type="get" to="room@conference.example.com" id="32oapq">
+  <query xmlns="http://jabber.org/protocol/disco#info" />
+</iq>]]></example>
+            <example caption='MUC room advertises support for emoji catalogs'><![CDATA[
+<iq type="result" from="room@conference.example.com" id="32oapq">
+  <query xmlns="http://jabber.org/protocol/disco#info">
+    ...
+    <feature var="urn:xmpp:emoji:0" />
+    ...
+  </query>
+</iq>
+]]></example>
+            <p>In order for an application to determine whether an entity supports this protocol, where possible it SHOULD use the dynamic, presence-based profile of service discovery defined in &xep0115;. However, if an application has not received entity capabilities information from an entity, it SHOULD use explicit service discovery instead.</p>
+        </section2>
+        <section2 topic='IQ-based Catalog Retrieval'>
+            <p>To retrieve an emoji catalog, an &IQ; request is made containing a &lt;catalog /&gt; element qualified by the 'urn:xmpp:emoji:0' namespace.</p>
+            <example caption='Retrieve the Catalog'><![CDATA[
+<iq type="get" to="room@conference.example.com" id="235ujt">
+  <catalog xmlns="urn:xmpp:emoji:0" />
+</iq>
+]]></example>
+            <example caption='Catalog results'><![CDATA[
+<iq type="result" from="room@conference.example.com" id="235ujt">
+  <catalog xmlns="urn:xmpp:emoji:0">
+    <emoji pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
+  </catalog>
+</iq>
+]]></example>
+        </section2>
+        <section2 topic='Use with PubSub'>
+            TBD. Needed for playing nicely with MIX.
+        </section2>
+    </section1>
+    <section1 topic='Security Considerations' anchor='security'>
+        <p>Because a shared emoji catalog can trigger automatated textual replacements in messages, care needs to be taken to not share catalogs between conversation or security contexts.</p>
+        <p>In the absence of any deployment specific policies, emoji catalogs retrieved from one bare JID SHOULD NOT be used with other bare JIDs.</p>
+    </section1>
+    <section1 topic='IANA Considerations' anchor='iana'>
+        <p>This document requires no interaction with &IANA;.</p>
+    </section1>
+    <section1 topic='XMPP Registrar Considerations' anchor='registrar'>
+        <p>The &REGISTRAR; includes 'urn:xmpp:emoji:0' in its registry of protocol namespaces (see &NAMESPACES;).</p>
+        <ul>
+            <li>urn:xmpp:emoji:0</li>
+        </ul>
+    </section1>
+    <section1 topic='XML Schema' anchor='schema'>
+        <code><![CDATA[
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'
+          targetNamespace='urn:xmpp:emoji:0'
+          xmlns='urn:xmpp:emoji:0'
+          elementFormDefault='qualified'>
+  <xs:annotation>
+    <xs:documentation>
+      The protocol documented by this schema is defined in
+      XEP-xxxx: http://www.xmpp.org/extensions/xep-xxxx.html
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:element name='emoji'>
+    <xs:complexType>
+      <xs:attribute name='pattern' type='xs:string' use='required' />
+      <xs:attribute name='uri' type='xs:anyURI' use='required' />
+      <xs:attribute name='width' type='xs:nonNegativeInteger' />
+      <xs:attribute name='height' type='xs:nonNegativeInteger' />
+      <xs:element name='alias' type='xs:string' minOccurs='0' maxOccurs='unbouned' />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name='catalog'>
+    <xs:complexType>
+      <xs:element ref='emoji' minOccurs='0' maxOccurs='unbounded' />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>]]></code>
+    </section1>
+</xep>
