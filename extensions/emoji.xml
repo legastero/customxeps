@@ -42,21 +42,21 @@
         <p>This document describes the use of a catalog mechanism for exchanging text patterns and associated image URIs inside of a conversation context, and is primarily envisioned for use inside of MUC rooms.</p>
     </section1>
     <section1 topic='Protocol' anchor='protocol'>
-        <p>The emoji catalog is contained by a &lt;catalog /&gt; element qualified by the 'urn:xmpp:emoji:0' namespace. The &lt;catalog /&gt; element MAY include one or more &lt;emoji /&gt; elements which define the mappings between text patterns and image URIs.</p>
-        <p>The &lt;emoji /&gt; MUST include a 'pattern' attribute which contains the exact text which will be replaced with an image, and also MUST include a 'uri' attribute for the image's URI.</p>
-        <p>Optionally, 'width' and 'height' attributes MAY be included in the &lt;emoji/&gt; element, specifying the width and height of the image in pixels.</p>
-        <p>Each &lt;emoji /&gt; element MAY include one or more &lt;alias/&gt; elements whose text content are additional patterns that can be matched with the same image URI.</p>
+        <p>The emoji catalog is contained by a &lt;emoji/&gt; element qualified by the 'urn:xmpp:emoji:0' namespace. The &lt;emoji/&gt; element MAY include one or more &lt;item/&gt; elements which define the mappings between text patterns and image URIs.</p>
+        <p>The &lt;item/&gt; MUST include a 'pattern' attribute which contains the exact text which will be replaced with an image, and also MUST include a 'uri' attribute for the image's URI.</p>
+        <p>Optionally, 'width' and 'height' attributes MAY be included in the &lt;item/&gt; element, specifying the width and height of the image in pixels.</p>
+        <p>Each &lt;item/&gt; element MAY include one or more &lt;alias/&gt; elements whose text content are additional patterns that can be matched with the same image URI.</p>
         <example caption='A sample emoji catalog'><![CDATA[
-<catalog xmlns="urn:xmpp:emoji:0">
-  <emoji pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org">
+<emoji xmlns="urn:xmpp:emoji:0">
+  <item pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org">
     <alias>:thumbsup:</alias>
-  </emoji>
-  <emoji pattern=":-1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
-  <emoji pattern=":sticker:"
-         uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org"
-         width="50"
-         height="50" />
-</catalog>]]></example>
+  </item>
+  <item pattern=":-1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
+  <item pattern=":sticker:"
+        uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org"
+        width="50"
+        height="50" />
+</emoji>]]></example>
     </section1>
     <section1 topic='Use Cases' anchor='use-cases'>
         <section2 topic='Discovering Support'>
@@ -77,17 +77,17 @@
             <p>In order for an application to determine whether an entity supports this protocol, where possible it SHOULD use the dynamic, presence-based profile of service discovery defined in &xep0115;. However, if an application has not received entity capabilities information from an entity, it SHOULD use explicit service discovery instead.</p>
         </section2>
         <section2 topic='IQ-based Catalog Retrieval'>
-            <p>To retrieve an emoji catalog, an &IQ; request is made containing a &lt;catalog /&gt; element qualified by the 'urn:xmpp:emoji:0' namespace.</p>
+            <p>To retrieve an emoji catalog, an &IQ; request is made containing a &lt;emoji/&gt; element qualified by the 'urn:xmpp:emoji:0' namespace.</p>
             <example caption='Retrieve the Catalog'><![CDATA[
 <iq type="get" to="room@conference.example.com" id="235ujt">
-  <catalog xmlns="urn:xmpp:emoji:0" />
+  <emoji xmlns="urn:xmpp:emoji:0" />
 </iq>
 ]]></example>
             <example caption='Catalog results'><![CDATA[
 <iq type="result" from="room@conference.example.com" id="235ujt">
-  <catalog xmlns="urn:xmpp:emoji:0">
-    <emoji pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
-  </catalog>
+  <emoji xmlns="urn:xmpp:emoji:0">
+    <item pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
+  </emoji>
 </iq>
 ]]></example>
         </section2>
