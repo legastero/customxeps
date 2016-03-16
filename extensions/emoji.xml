@@ -92,7 +92,9 @@
 ]]></example>
         </section2>
         <section2 topic='Use with PubSub'>
-            TBD. Needed for playing nicely with MIX.
+            <p>TBD. Needed for playing nicely with MIX.</p>
+            <p>Publish to 'urn:xmpp:emoji:0' node.</p>
+            <p>How should this work with PEP? MEP? MIX?</p>
         </section2>
     </section1>
     <section1 topic='Security Considerations' anchor='security'>
