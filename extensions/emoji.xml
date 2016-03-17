@@ -45,13 +45,44 @@
         <p>The emoji catalog is contained by a &lt;emoji/&gt; element qualified by the 'urn:xmpp:emoji:0' namespace. The &lt;emoji/&gt; element MAY include one or more &lt;item/&gt; elements which define the mappings between text patterns and image URIs.</p>
         <p>The &lt;item/&gt; MUST include a 'pattern' attribute which contains the exact text which will be replaced with an image, and also MUST include a 'uri' attribute for the image's URI.</p>
         <p>Optionally, 'width' and 'height' attributes MAY be included in the &lt;item/&gt; element, specifying the width and height of the image in pixels.</p>
+        <table caption='Attributes for the &lt;item/&gt; element'>
+            <tr>
+                <th>Attribute Name</th>
+                <th>Description</th>
+                <th>Inclusion</th>
+            </tr>
+            <tr>
+                <td>pattern</td>
+                <td>A literal string pattern that will be replaced by an image. Patterns are <em>not</em> regular expressions, and comparisons between source text and the pattern SHOULD be done in a case insensitive manner. Pattern (and alias) values MUST be unique within a given &lt;emoji/&gt; element.</td>
+                <td>REQUIRED</td>
+            </tr>
+            <tr>
+                <td>uri</td>
+                <td>The URI where the image can be retrieved. While it is likely that most URIs will use the 'http' or 'https' schemes, it is also possible for the URI to use the 'cid' scheme as described in &xep0231;.</td>
+                <td>REQUIRED</td>
+            </tr>
+            <tr>
+                <td>height</td>
+                <td>The height of the image in number of pixels.</td>
+                <td>OPTIONAL</td>
+            </tr>
+            <tr>
+                <td>width</td>
+                <td>The width of the image in number of pixels.</td>
+                <td>OPTIONAL</td>
+            </tr>
+        </table>
         <p>Each &lt;item/&gt; element MAY include one or more &lt;alias/&gt; elements whose text content are additional patterns that can be matched with the same image URI.</p>
+        <p>The &lt;item/&gt; element also MAY include one or more &lt;tag/&gt; elements whose text content could be used to group emoji or otherwise assist with auto-completion.</p>
         <example caption='A sample emoji catalog'><![CDATA[
 <emoji xmlns="urn:xmpp:emoji:0">
   <item pattern=":+1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org">
     <alias>:thumbsup:</alias>
+    <tag>Voting</tag>
   </item>
-  <item pattern=":-1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org" />
+  <item pattern=":-1:" uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org">
+    <tag>Voting</tag>
+  </item>
   <item pattern=":sticker:"
         uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org"
         width="50"
@@ -96,6 +127,10 @@
             <p>Publish to 'urn:xmpp:emoji:0' node.</p>
             <p>How should this work with PEP? MEP? MIX?</p>
         </section2>
+        <section2 topic='Adding and Removing Emoji'>
+            <p>TBD. It is very likely that this would be handled out-of-band, so do we need to cover this case? If so, how should we do it?</p>
+            <p>Likewise for removing emoji.</p>
+        </section2>
     </section1>
     <section1 topic='Security Considerations' anchor='security'>
         <p>Because a shared emoji catalog can trigger automatated textual replacements in messages, care needs to be taken to not share catalogs between conversation or security contexts.</p>
@@ -124,19 +159,20 @@
     </xs:documentation>
   </xs:annotation>
 
-  <xs:element name='emoji'>
+  <xs:element name='item'>
     <xs:complexType>
       <xs:attribute name='pattern' type='xs:string' use='required' />
       <xs:attribute name='uri' type='xs:anyURI' use='required' />
       <xs:attribute name='width' type='xs:nonNegativeInteger' />
       <xs:attribute name='height' type='xs:nonNegativeInteger' />
       <xs:element name='alias' type='xs:string' minOccurs='0' maxOccurs='unbouned' />
+      <xs:element name='tag' type='xs:string' minOccurs='0' maxOccurs='unbouned' />
     </xs:complexType>
   </xs:element>
 
-  <xs:element name='catalog'>
+  <xs:element name='emoji'>
     <xs:complexType>
-      <xs:element ref='emoji' minOccurs='0' maxOccurs='unbounded' />
+      <xs:element ref='item' minOccurs='0' maxOccurs='unbounded' />
     </xs:complexType>
   </xs:element>
 </xs:schema>]]></code>
