@@ -89,7 +89,7 @@
     <tag>Voting</tag>
   </item>
   <item pattern=":sticker:"
-        uri="cid:sha1+8f35fef110ffc5df08d579a50083ff9308fb6242@bob.xmpp.org"
+        uri="https://files.example.com/emoji/sticker.png"
         width="50"
         height="50" />
 </emoji>]]></example>
