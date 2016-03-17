@@ -53,13 +53,18 @@
             </tr>
             <tr>
                 <td>pattern</td>
-                <td>A literal string pattern that will be replaced by an image. Patterns are <em>not</em> regular expressions, and comparisons between source text and the pattern SHOULD be done in a case insensitive manner. Pattern (and alias) values MUST be unique within a given &lt;emoji/&gt; element.</td>
+                <td>A literal string pattern that will be replaced by an image. Patterns are <em>not</em> regular expressions, and comparisons between source text and the pattern SHOULD first be matched by exact text, but MAY also be done in a case insensitive manner. Pattern (and alias) values MUST be unique within a given &lt;emoji/&gt; element.</td>
                 <td>REQUIRED</td>
             </tr>
             <tr>
                 <td>uri</td>
                 <td>The URI where the image can be retrieved. While it is likely that most URIs will use the 'http' or 'https' schemes, it is also possible for the URI to use the 'cid' scheme as described in &xep0231;.</td>
                 <td>REQUIRED</td>
+            </tr>
+            <tr>
+                <td>media-type</td>
+                <td>The media type of the image. If not specified the media type is assumed to be "image/png".</td>
+                <td>OPTIONAL</td>
             </tr>
             <tr>
                 <td>height</td>
@@ -135,6 +140,7 @@
     <section1 topic='Security Considerations' anchor='security'>
         <p>Because a shared emoji catalog can trigger automatated textual replacements in messages, care needs to be taken to not share catalogs between conversation or security contexts.</p>
         <p>In the absence of any deployment specific policies, emoji catalogs retrieved from one bare JID SHOULD NOT be used with other bare JIDs.</p>
+        <p>Automatic retrieval of emoji images could result in a presence leak if the emoji catalog was retrieved from an entity that is not subscribed to the user's presence.</p>
     </section1>
     <section1 topic='IANA Considerations' anchor='iana'>
         <p>This document requires no interaction with &IANA;.</p>
@@ -165,6 +171,7 @@
       <xs:attribute name='uri' type='xs:anyURI' use='required' />
       <xs:attribute name='width' type='xs:nonNegativeInteger' />
       <xs:attribute name='height' type='xs:nonNegativeInteger' />
+      <xs:attribute name='media-type' type='xs:string' />
       <xs:element name='alias' type='xs:string' minOccurs='0' maxOccurs='unbouned' />
       <xs:element name='tag' type='xs:string' minOccurs='0' maxOccurs='unbouned' />
     </xs:complexType>
